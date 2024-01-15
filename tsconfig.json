@@ -1,0 +1,13 @@
+{
+	"compilerOptions": {
+		"rootDir": "./app",
+		"outDir": "./build",
+		"esModuleInterop": true,
+		"resolveJsonModule": true,
+		"lib": ["es6"],
+		"module": "CommonJS",
+		"allowJs": true,
+		"noImplicitAny": true
+	},
+	"exclude": ["./node_modules"]
+}
