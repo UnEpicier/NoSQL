@@ -99,4 +99,56 @@ const createCharacterInDB = async (
 	}
 };
 
-export { getAllCharactersInDB, getCharacterInDB, createCharacterInDB };
+const updateCharacterInDB = async (
+	id: string,
+	sprite: string,
+	hp: number,
+	attack: number,
+	defense: number,
+): Promise<Character> => {
+	try {
+		await redisClient.connect();
+
+		const key = id.includes('character:') ? id : `character:${id}`;
+
+		if (sprite) {
+			await redisClient.HSET(key, 'sprite', sprite);
+		}
+
+		if (hp) {
+			await redisClient.HSET(key, 'hp', hp);
+		}
+
+		if (attack) {
+			await redisClient.HSET(key, 'attack', attack);
+		}
+
+		if (defense) {
+			await redisClient.HSET(key, 'defense', defense);
+		}
+
+		const result = await redisClient.HGETALL(key);
+
+		await redisClient.quit();
+
+		return {
+			id: key,
+			sprite: result.sprite,
+			hp: parseInt(result.hp),
+			attack: parseFloat(result.attack),
+			defense: parseFloat(result.defense),
+		};
+	} catch (error) {
+		console.error(error);
+		await redisClient.quit();
+
+		throw Error(`Unable to update character with it: ${id}`);
+	}
+};
+
+export {
+	getAllCharactersInDB,
+	getCharacterInDB,
+	createCharacterInDB,
+	updateCharacterInDB,
+};

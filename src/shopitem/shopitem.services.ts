@@ -107,12 +107,14 @@ const updateShopItemDB = async (
 			await redisClient.HSET(key, 'sprite', sprite);
 		}
 
+		const result = await redisClient.HGETALL(key);
+
 		await redisClient.quit();
 
 		return {
 			id: key,
-			cost: cost,
-			sprite: sprite,
+			cost: parseInt(result.cost),
+			sprite: result.sprite,
 		};
 	} catch (error) {
 		console.error(error);

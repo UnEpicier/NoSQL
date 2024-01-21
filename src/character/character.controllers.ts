@@ -3,6 +3,7 @@ import {
 	createCharacterInDB,
 	getAllCharactersInDB,
 	getCharacterInDB,
+	updateCharacterInDB,
 } from './character.services';
 
 const getAllCharacters = async (_: Request, res: Response) => {
@@ -65,4 +66,30 @@ const createCharacter = async (req: Request, res: Response) => {
 	}
 };
 
-export { getAllCharacters, getCharacter, createCharacter };
+const updateCharacter = async (req: Request, res: Response) => {
+	const { id } = req.params;
+	const { sprite, hp, attack, defense } = req.body || {};
+
+	if (!sprite && !hp && !attack && !defense) {
+		res.status(400).send('Missing field(s) in request body');
+		return;
+	}
+
+	try {
+		const character = await updateCharacterInDB(
+			id,
+			sprite,
+			hp,
+			attack,
+			defense,
+		);
+
+		res.status(200).send(character);
+		return;
+	} catch {
+		res.status(500).end();
+		return;
+	}
+};
+
+export { getAllCharacters, getCharacter, createCharacter, updateCharacter };
