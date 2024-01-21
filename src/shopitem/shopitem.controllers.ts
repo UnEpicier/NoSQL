@@ -1,15 +1,15 @@
 import { Request, Response } from 'express';
 import {
-	getAllShopItemsDB,
-	getShopItemDB,
-	createShopItemDB,
-	updateShopItemDB,
-	deleteShopItemDB,
+	getAllShopItemsInDB,
+	getShopItemInDB,
+	createShopItemInDB,
+	updateShopItemInDB,
+	deleteShopItemInDB,
 } from './shopitem.services';
 
 const getAllShopItems = async (_: Request, res: Response) => {
 	try {
-		const shopItems = await getAllShopItemsDB();
+		const shopItems = await getAllShopItemsInDB();
 
 		if (shopItems.length > 0) {
 			res.status(200).send(shopItems);
@@ -28,7 +28,7 @@ const getShopItem = async (req: Request, res: Response) => {
 	const { id } = req.params;
 
 	try {
-		const shopItem = await getShopItemDB(id);
+		const shopItem = await getShopItemInDB(id);
 
 		if (!shopItem) {
 			res.status(404).end();
@@ -57,7 +57,7 @@ const createShopItem = async (req: Request, res: Response) => {
 	}
 
 	try {
-		const shopItem = await createShopItemDB(cost, sprite);
+		const shopItem = await createShopItemInDB(cost, sprite);
 
 		res.status(200).send(shopItem);
 		return;
@@ -82,7 +82,7 @@ const updateShopItem = async (req: Request, res: Response) => {
 	}
 
 	try {
-		const shopItem = await updateShopItemDB(id, cost, sprite);
+		const shopItem = await updateShopItemInDB(id, cost, sprite);
 
 		res.status(200).send(shopItem);
 		return;
@@ -96,7 +96,7 @@ const deleteShopItem = async (req: Request, res: Response) => {
 	const { id } = req.params;
 
 	try {
-		await deleteShopItemDB(`${id}`);
+		await deleteShopItemInDB(`${id}`);
 		res.status(200).end();
 		return;
 	} catch (error) {

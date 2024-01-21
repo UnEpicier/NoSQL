@@ -81,6 +81,62 @@ describe('II. Get All Summon Pools', () => {
 	});
 });
 
+describe('III. Update Summon Pool', () => {
+	it('01 PATCH  - Missing field', async () => {
+		const response = await request(`localhost:${process.env.PORT}`).patch(
+			`/summonpool/${summonPool.id}`,
+		);
+
+		expect(response.statusCode).toBe(400);
+	});
+
+	it('02 PATCH  - Update characters', async () => {
+		const response = await request(`localhost:${process.env.PORT}`)
+			.patch(`/summonpool/${summonPool.id}`)
+			.send({
+				characters: [characters[0].id],
+			});
+
+		expect(response.body.characters.length).toBe(1);
+	});
+
+	it('03 PATCH  - Update cost', async () => {
+		const response = await request(`localhost:${process.env.PORT}`)
+			.patch(`/summonpool/${summonPool.id}`)
+			.send({
+				cost: 100,
+			});
+
+		expect(response.body.cost).toBe(100);
+	});
+
+	it('04 PATCH  - Update duration', async () => {
+		const response = await request(`localhost:${process.env.PORT}`)
+			.patch(`/summonpool/${summonPool.id}`)
+			.send({
+				duration: 10000,
+			});
+
+		expect(response.body.duration).toBe(10000);
+	});
+
+	it('05 PATCH  - Update all', async () => {
+		const response = await request(`localhost:${process.env.PORT}`)
+			.patch(`/summonpool/${summonPool.id}`)
+			.send({
+				characters: [characters[1].id],
+				cost: 1,
+				duration: 2,
+			});
+
+		expect(response.body).toMatchObject({
+			characters: [characters[1]],
+			cost: 1,
+			duration: 2,
+		});
+	});
+});
+
 describe('IV. Get Updated Summon Pool', () => {
 	it('01 GET    - Wrong Summon Pool', async () => {
 		const response = await request(`localhost:${process.env.PORT}`).get(

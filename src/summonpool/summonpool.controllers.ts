@@ -3,6 +3,7 @@ import {
 	createSummonPoolInDB,
 	getAllSummonPoolsInDB,
 	getSummonPoolInDB,
+	updateSummonPoolInDB,
 } from './summonpool.services';
 
 const getAllSummonPools = async (req: Request, res: Response) => {
@@ -68,4 +69,34 @@ const createSummonPool = async (req: Request, res: Response) => {
 	}
 };
 
-export { createSummonPool, getAllSummonPools, getSummonPool };
+const updateSummonPool = async (req: Request, res: Response) => {
+	const { id } = req.params;
+	const { characters, cost, duration } = req.body || {};
+
+	if (!characters && !cost && !duration) {
+		res.status(400).send('Missing field(s) in request body');
+		return;
+	}
+
+	if ((cost && !parseFloat(cost)) || (duration && !parseInt(duration))) {
+		res.status(422).send('Wrong field(s) type in request body');
+		return;
+	}
+
+	try {
+		const summonPool = await updateSummonPoolInDB(
+			id,
+			characters,
+			cost,
+			duration,
+		);
+
+		res.status(200).send(summonPool);
+		return;
+	} catch (error) {
+		res.status(500).send(error);
+		return;
+	}
+};
+
+export { createSummonPool, getAllSummonPools, getSummonPool, updateSummonPool };

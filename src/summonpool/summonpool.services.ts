@@ -86,8 +86,8 @@ const getSummonPoolInDB = async (id: string): Promise<SummonPool | null> => {
 		return {
 			id: key,
 			characters: populatedCharacters,
-			cost: parseInt(result.cost),
-			duration: parseFloat(result.duration),
+			cost: parseFloat(result.cost),
+			duration: parseInt(result.duration),
 		};
 	} catch (error) {
 		console.error(error);
@@ -146,4 +146,73 @@ const createSummonPoolInDB = async (
 	}
 };
 
-export { getAllSummonPoolsInDB, createSummonPoolInDB, getSummonPoolInDB };
+const updateSummonPoolInDB = async (
+	id: string,
+	characters: string[],
+	cost: number,
+	duration: number,
+): Promise<SummonPool> => {
+	try {
+		await redisClient.connect();
+
+		const key = id.includes('summonpool:') ? id : `summonpool:${id}`;
+
+		if (characters) {
+			await redisClient.HSET(
+				key,
+				'characters',
+				JSON.stringify(characters),
+			);
+		}
+
+		if (cost) {
+			await redisClient.HSET(key, 'cost', cost);
+		}
+
+		if (duration) {
+			await redisClient.HSET(key, 'duration', duration);
+		}
+
+		const result = await redisClient.HGETALL(key);
+
+		const chars: string[] = characters
+			? characters
+			: JSON.parse(result.characters);
+
+		// Populate characters array
+		const populatedCharacters: Character[] = await Promise.all(
+			chars.map(async (character) => {
+				const result = await redisClient.HGETALL(character);
+
+				return {
+					id: character,
+					sprite: result.sprite,
+					hp: parseInt(result.hp),
+					attack: parseFloat(result.attack),
+					defense: parseFloat(result.defense),
+				};
+			}),
+		);
+
+		await redisClient.quit();
+
+		return {
+			id: key,
+			characters: populatedCharacters,
+			cost: parseFloat(result.cost),
+			duration: parseInt(result.duration),
+		};
+	} catch (error) {
+		console.error(error);
+		await redisClient.quit();
+
+		throw Error(`Unable to update summon pool with id: ${id}`);
+	}
+};
+
+export {
+	getAllSummonPoolsInDB,
+	createSummonPoolInDB,
+	getSummonPoolInDB,
+	updateSummonPoolInDB,
+};

@@ -2,7 +2,7 @@ import { v4 } from 'uuid';
 import redisClient from '@utils/redis';
 import { ShopItem } from '../types/shopItem';
 
-const getAllShopItemsDB = async (): Promise<ShopItem[]> => {
+const getAllShopItemsInDB = async (): Promise<ShopItem[]> => {
 	try {
 		await redisClient.connect();
 
@@ -31,7 +31,7 @@ const getAllShopItemsDB = async (): Promise<ShopItem[]> => {
 	}
 };
 
-const getShopItemDB = async (id: string): Promise<ShopItem | null> => {
+const getShopItemInDB = async (id: string): Promise<ShopItem | null> => {
 	try {
 		const key = id.includes('shopitem:') ? id : `shopitem:${id}`;
 
@@ -62,7 +62,7 @@ const getShopItemDB = async (id: string): Promise<ShopItem | null> => {
 	}
 };
 
-const createShopItemDB = async (
+const createShopItemInDB = async (
 	cost: number,
 	sprite: string,
 ): Promise<ShopItem> => {
@@ -89,7 +89,7 @@ const createShopItemDB = async (
 	}
 };
 
-const updateShopItemDB = async (
+const updateShopItemInDB = async (
 	id: string,
 	cost: number,
 	sprite: string,
@@ -124,7 +124,7 @@ const updateShopItemDB = async (
 	}
 };
 
-const deleteShopItemDB = async (id: string) => {
+const deleteShopItemInDB = async (id: string) => {
 	try {
 		const key = id.includes('shopitem:') ? id : `shopitem:${id}`;
 
@@ -144,9 +144,9 @@ const deleteShopItemDB = async (id: string) => {
 };
 
 export {
-	getAllShopItemsDB,
-	getShopItemDB,
-	createShopItemDB,
-	updateShopItemDB,
-	deleteShopItemDB,
+	createShopItemInDB,
+	deleteShopItemInDB,
+	getAllShopItemsInDB,
+	getShopItemInDB,
+	updateShopItemInDB,
 };
