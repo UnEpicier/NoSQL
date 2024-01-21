@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import {
 	createCharacterInDB,
+	deleteCharacterInDB,
 	getAllCharactersInDB,
 	getCharacterInDB,
 	updateCharacterInDB,
@@ -15,10 +16,10 @@ const getAllCharacters = async (_: Request, res: Response) => {
 			return;
 		}
 
-		res.status(204).json([]);
+		res.status(204).send([]);
 		return;
-	} catch {
-		res.status(500).end();
+	} catch (error) {
+		res.status(500).send(error);
 		return;
 	}
 };
@@ -34,10 +35,10 @@ const getCharacter = async (req: Request, res: Response) => {
 			return;
 		}
 
-		res.status(200).json(character);
+		res.status(200).send(character);
 		return;
-	} catch {
-		res.status(500).end();
+	} catch (error) {
+		res.status(500).send(error);
 		return;
 	}
 };
@@ -58,10 +59,10 @@ const createCharacter = async (req: Request, res: Response) => {
 			defense,
 		);
 
-		res.status(200).json(character);
+		res.status(200).send(character);
 		return;
-	} catch {
-		res.status(500).end();
+	} catch (error) {
+		res.status(500).send(error);
 		return;
 	}
 };
@@ -86,10 +87,29 @@ const updateCharacter = async (req: Request, res: Response) => {
 
 		res.status(200).send(character);
 		return;
-	} catch {
-		res.status(500).end();
+	} catch (error) {
+		res.status(500).send(error);
 		return;
 	}
 };
 
-export { getAllCharacters, getCharacter, createCharacter, updateCharacter };
+const deleteCharacter = async (req: Request, res: Response) => {
+	const { id } = req.params;
+
+	try {
+		await deleteCharacterInDB(id);
+		res.status(200).end();
+		return;
+	} catch (error) {
+		res.status(500).send(error);
+		return;
+	}
+};
+
+export {
+	getAllCharacters,
+	getCharacter,
+	createCharacter,
+	updateCharacter,
+	deleteCharacter,
+};

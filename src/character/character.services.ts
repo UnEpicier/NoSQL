@@ -146,9 +146,29 @@ const updateCharacterInDB = async (
 	}
 };
 
+const deleteCharacterInDB = async (id: string) => {
+	try {
+		const key = id.includes('character:') ? id : `character:${id}`;
+
+		await redisClient.connect();
+
+		await redisClient.DEL(key);
+
+		await redisClient.quit();
+
+		return;
+	} catch (error) {
+		console.error(error);
+		await redisClient.quit();
+
+		throw Error(`Unable to delete character with id: ${id}`);
+	}
+};
+
 export {
 	getAllCharactersInDB,
 	getCharacterInDB,
 	createCharacterInDB,
 	updateCharacterInDB,
+	deleteCharacterInDB,
 };

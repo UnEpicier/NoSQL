@@ -131,3 +131,13 @@ describe('IV. Get updated character', () => {
 		expect(response.statusCode).toBe(200);
 	});
 });
+
+describe('V. Delete character', () => {
+	it('01 DEL    - Delete character', async () => {
+		const response = await request(`localhost:${process.env.PORT}`).del(
+			`/character/${character.id}`,
+		);
+
+		expect(response.statusCode).toBe(200);
+	});
+});
