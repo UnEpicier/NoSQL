@@ -51,6 +51,11 @@ const createShopItem = async (req: Request, res: Response) => {
 		return;
 	}
 
+	if (!parseInt(cost)) {
+		res.status(422).send('Wrong field(s) type in request body');
+		return;
+	}
+
 	try {
 		const shopItem = await createShopItemDB(cost, sprite);
 
@@ -68,6 +73,11 @@ const updateShopItem = async (req: Request, res: Response) => {
 
 	if (!cost && !sprite) {
 		res.status(400).send('Missing field(s) in request body');
+		return;
+	}
+
+	if (cost && !parseInt(cost)) {
+		res.status(422).send('Wrong field(s) type in request body');
 		return;
 	}
 

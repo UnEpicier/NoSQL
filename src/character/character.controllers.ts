@@ -51,6 +51,11 @@ const createCharacter = async (req: Request, res: Response) => {
 		return;
 	}
 
+	if (!parseInt(hp) || !parseInt(attack) || !parseInt(defense)) {
+		res.status(422).send('Wrong field(s) type in request body');
+		return;
+	}
+
 	try {
 		const character = await createCharacterInDB(
 			sprite,
@@ -73,6 +78,15 @@ const updateCharacter = async (req: Request, res: Response) => {
 
 	if (!sprite && !hp && !attack && !defense) {
 		res.status(400).send('Missing field(s) in request body');
+		return;
+	}
+
+	if (
+		(hp && !parseInt(hp)) ||
+		(attack && !parseInt(attack)) ||
+		(defense && !parseInt(defense))
+	) {
+		res.status(422).send('Wrong field(s) type in request body');
 		return;
 	}
 
