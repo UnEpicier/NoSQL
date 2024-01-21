@@ -49,6 +49,54 @@ const getAllSummonPoolsInDB = async (): Promise<SummonPool[]> => {
 	}
 };
 
+const getSummonPoolInDB = async (id: string): Promise<SummonPool | null> => {
+	try {
+		const key = id.includes('summonpool:') ? id : `summonpool:${id}`;
+
+		await redisClient.connect();
+
+		const exists = await redisClient.EXISTS(key);
+
+		if (exists == 0) {
+			await redisClient.quit();
+
+			return null;
+		}
+
+		const result = await redisClient.HGETALL(key);
+
+		const characters: string[] = JSON.parse(result.characters);
+
+		const populatedCharacters: Character[] = await Promise.all(
+			characters.map(async (character) => {
+				const result = await redisClient.HGETALL(character);
+
+				return {
+					id: character,
+					sprite: result.sprite,
+					hp: parseInt(result.hp),
+					attack: parseFloat(result.attack),
+					defense: parseFloat(result.defense),
+				};
+			}),
+		);
+
+		await redisClient.quit();
+
+		return {
+			id: key,
+			characters: populatedCharacters,
+			cost: parseInt(result.cost),
+			duration: parseFloat(result.duration),
+		};
+	} catch (error) {
+		console.error(error);
+		await redisClient.quit();
+
+		throw Error(`Unable to get summon pool with id: ${id}`);
+	}
+};
+
 const createSummonPoolInDB = async (
 	characters: string[],
 	cost: number,
@@ -98,4 +146,4 @@ const createSummonPoolInDB = async (
 	}
 };
 
-export { getAllSummonPoolsInDB, createSummonPoolInDB };
+export { getAllSummonPoolsInDB, createSummonPoolInDB, getSummonPoolInDB };

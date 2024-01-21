@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import {
 	createSummonPoolInDB,
 	getAllSummonPoolsInDB,
+	getSummonPoolInDB,
 } from './summonpool.services';
 
 const getAllSummonPools = async (req: Request, res: Response) => {
@@ -14,6 +15,25 @@ const getAllSummonPools = async (req: Request, res: Response) => {
 		}
 
 		res.status(204).send([]);
+		return;
+	} catch (error) {
+		res.status(500).send(error);
+		return;
+	}
+};
+
+const getSummonPool = async (req: Request, res: Response) => {
+	const { id } = req.params;
+
+	try {
+		const summonPool = await getSummonPoolInDB(id);
+
+		if (!summonPool) {
+			res.status(404).end();
+			return;
+		}
+
+		res.status(200).send(summonPool);
 		return;
 	} catch (error) {
 		res.status(500).send(error);
@@ -48,4 +68,4 @@ const createSummonPool = async (req: Request, res: Response) => {
 	}
 };
 
-export { createSummonPool, getAllSummonPools };
+export { createSummonPool, getAllSummonPools, getSummonPool };

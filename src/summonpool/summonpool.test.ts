@@ -80,3 +80,21 @@ describe('II. Get All Summon Pools', () => {
 		expect(summonPools.map((x) => x.id)).toContain(summonPool.id);
 	});
 });
+
+describe('IV. Get Updated Summon Pool', () => {
+	it('01 GET    - Wrong Summon Pool', async () => {
+		const response = await request(`localhost:${process.env.PORT}`).get(
+			`/summonpool/12345`,
+		);
+
+		expect(response.statusCode).toBe(404);
+	});
+
+	it('02 GET    - Get Summon Pool', async () => {
+		const response = await request(`localhost:${process.env.PORT}`).get(
+			`/summonpool/${summonPool.id}`,
+		);
+
+		expect(response.statusCode).toBe(200);
+	});
+});
