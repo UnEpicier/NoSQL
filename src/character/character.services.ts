@@ -14,10 +14,10 @@ const getAllCharactersInDB = async (): Promise<Character[]> => {
 
 				return {
 					id: key,
-					sprite: result[1],
-					hp: parseInt(result[3]),
-					attack: parseFloat(result[5]),
-					defense: parseFloat(result[7]),
+					sprite: result.sprite,
+					hp: parseInt(result.hp),
+					attack: parseFloat(result.attack),
+					defense: parseFloat(result.defense),
 				};
 			}),
 		);

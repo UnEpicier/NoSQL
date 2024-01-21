@@ -68,3 +68,15 @@ describe('I. Create summonPool', () => {
 		expect(response.statusCode).toBe(200);
 	});
 });
+
+describe('II. Get All Summon Pools', () => {
+	it('01 GET    - Include created summon pool', async () => {
+		const response = await request(`localhost:${process.env.PORT}`).get(
+			'/summonpools',
+		);
+
+		const summonPools: SummonPool[] = response.body;
+
+		expect(summonPools.map((x) => x.id)).toContain(summonPool.id);
+	});
+});

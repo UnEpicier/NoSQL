@@ -14,8 +14,8 @@ const getAllShopItemsDB = async (): Promise<ShopItem[]> => {
 
 				return {
 					id: key,
-					cost: parseInt(result[1]),
-					sprite: result[3],
+					cost: parseInt(result.cost),
+					sprite: result.sprite,
 				};
 			}),
 		);

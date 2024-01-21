@@ -3,6 +3,52 @@ import redisClient from '@utils/redis';
 import { SummonPool } from '../types/summonpool';
 import { Character } from '../types/character';
 
+const getAllSummonPoolsInDB = async (): Promise<SummonPool[]> => {
+	try {
+		await redisClient.connect();
+
+		const matchingKeys = await redisClient.KEYS('summonpool:*');
+
+		const summonPools: SummonPool[] = await Promise.all(
+			matchingKeys.map(async (key) => {
+				const result = await redisClient.HGETALL(key);
+
+				const characters: string[] = JSON.parse(result.characters);
+
+				const populatedCharacters: Character[] = await Promise.all(
+					characters.map(async (character) => {
+						const result = await redisClient.HGETALL(character);
+
+						return {
+							id: character,
+							sprite: result.sprite,
+							hp: parseInt(result.hp),
+							attack: parseFloat(result.attack),
+							defense: parseFloat(result.defense),
+						};
+					}),
+				);
+
+				return {
+					id: key,
+					characters: populatedCharacters,
+					cost: parseFloat(result.cost),
+					duration: parseInt(result.duration),
+				};
+			}),
+		);
+
+		await redisClient.quit();
+
+		return summonPools;
+	} catch (error) {
+		console.error(error);
+		await redisClient.quit();
+
+		throw Error('Unable to get summon pools');
+	}
+};
+
 const createSummonPoolInDB = async (
 	characters: string[],
 	cost: number,
@@ -28,10 +74,10 @@ const createSummonPoolInDB = async (
 
 				return {
 					id: character,
-					sprite: result[1],
-					hp: parseInt(result[3]),
-					attack: parseFloat(result[5]),
-					defense: parseFloat(result[7]),
+					sprite: result.sprite,
+					hp: parseInt(result.hp),
+					attack: parseFloat(result.attack),
+					defense: parseFloat(result.defense),
 				};
 			}),
 		);
@@ -52,4 +98,4 @@ const createSummonPoolInDB = async (
 	}
 };
 
-export { createSummonPoolInDB };
+export { getAllSummonPoolsInDB, createSummonPoolInDB };

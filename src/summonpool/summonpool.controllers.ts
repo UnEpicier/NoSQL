@@ -1,5 +1,25 @@
 import { Request, Response } from 'express';
-import { createSummonPoolInDB } from './summonpool.services';
+import {
+	createSummonPoolInDB,
+	getAllSummonPoolsInDB,
+} from './summonpool.services';
+
+const getAllSummonPools = async (req: Request, res: Response) => {
+	try {
+		const summonPools = await getAllSummonPoolsInDB();
+
+		if (summonPools.length > 0) {
+			res.status(200).send(summonPools);
+			return;
+		}
+
+		res.status(204).send([]);
+		return;
+	} catch (error) {
+		res.status(500).send(error);
+		return;
+	}
+};
 
 const createSummonPool = async (req: Request, res: Response) => {
 	const { characters, cost, duration } = req.body || {};
@@ -28,4 +48,4 @@ const createSummonPool = async (req: Request, res: Response) => {
 	}
 };
 
-export { createSummonPool };
+export { createSummonPool, getAllSummonPools };
