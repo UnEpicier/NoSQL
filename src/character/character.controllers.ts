@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { getAllCharactersInDB } from './character.services';
+import { getAllCharactersInDB, getCharacterInDB } from './character.services';
 
 const getAllCharacters = async (_: Request, res: Response) => {
 	try {
@@ -18,4 +18,23 @@ const getAllCharacters = async (_: Request, res: Response) => {
 	}
 };
 
-export { getAllCharacters };
+const getCharacter = async (req: Request, res: Response) => {
+	const { id } = req.params;
+
+	try {
+		const character = await getCharacterInDB(id);
+
+		if (!character) {
+			res.status(404).end();
+			return;
+		}
+
+		res.status(200).send(character);
+		return;
+	} catch {
+		res.status(500).end();
+		return;
+	}
+};
+
+export { getAllCharacters, getCharacter };

@@ -32,4 +32,37 @@ const getAllCharactersInDB = async (): Promise<Character[]> => {
 	}
 };
 
-export { getAllCharactersInDB };
+const getCharacterInDB = async (id: string): Promise<Character | null> => {
+	try {
+		const key = id.includes('character:') ? id : `character:${id}`;
+
+		await redisClient.connect();
+
+		const exists = await redisClient.EXISTS(key);
+
+		if (exists == 0) {
+			await redisClient.disconnect();
+
+			return null;
+		}
+
+		const result = await redisClient.HGETALL(key);
+
+		await redisClient.disconnect();
+
+		return {
+			id: key,
+			sprite: result.sprite,
+			hp: parseInt(result.hp),
+			attack: parseFloat(result.attack),
+			defense: parseFloat(result.defense),
+		};
+	} catch (error) {
+		console.error(error);
+		await redisClient.disconnect();
+
+		throw Error(`Unable to get character with id: ${id}`);
+	}
+};
+
+export { getAllCharactersInDB, getCharacterInDB };
