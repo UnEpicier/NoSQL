@@ -210,9 +210,27 @@ const updateSummonPoolInDB = async (
 	}
 };
 
+const deleteSummonPoolInDB = async (id: string): Promise<void> => {
+	try {
+		const key = id.includes('summonpool:') ? id : `summonpool:${id}`;
+
+		await redisClient.connect();
+
+		await redisClient.DEL(key);
+
+		await redisClient.quit();
+	} catch (error) {
+		console.error(error);
+		await redisClient.quit();
+
+		throw Error(`Unable to delete summon pool with id: ${id}`);
+	}
+};
+
 export {
 	getAllSummonPoolsInDB,
 	createSummonPoolInDB,
 	getSummonPoolInDB,
 	updateSummonPoolInDB,
+	deleteSummonPoolInDB,
 };

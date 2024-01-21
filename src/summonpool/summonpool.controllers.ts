@@ -4,6 +4,7 @@ import {
 	getAllSummonPoolsInDB,
 	getSummonPoolInDB,
 	updateSummonPoolInDB,
+	deleteSummonPoolInDB,
 } from './summonpool.services';
 
 const getAllSummonPools = async (req: Request, res: Response) => {
@@ -99,4 +100,23 @@ const updateSummonPool = async (req: Request, res: Response) => {
 	}
 };
 
-export { createSummonPool, getAllSummonPools, getSummonPool, updateSummonPool };
+const deleteSummonPool = async (req: Request, res: Response) => {
+	const { id } = req.params;
+
+	try {
+		await deleteSummonPoolInDB(id);
+		res.status(200).end();
+		return;
+	} catch (error) {
+		res.status(500).send(error);
+		return;
+	}
+};
+
+export {
+	createSummonPool,
+	getAllSummonPools,
+	getSummonPool,
+	updateSummonPool,
+	deleteSummonPool,
+};

@@ -154,3 +154,29 @@ describe('IV. Get Updated Summon Pool', () => {
 		expect(response.statusCode).toBe(200);
 	});
 });
+
+describe('V. Delete Summon Pool', () => {
+	it('01 DEL    - Delete summon pool', async () => {
+		const response = await request(`localhost:${process.env.PORT}`).delete(
+			`/summonpool/${summonPool.id}`,
+		);
+
+		expect(response.statusCode).toBe(200);
+	});
+
+	it('02 DEL    - Delete first character', async () => {
+		const response = await request(`localhost:${process.env.PORT}`).delete(
+			`/character/${characters[0].id}`,
+		);
+
+		expect(response.statusCode).toBe(200);
+	});
+
+	it('03 DEL    - Delete second character', async () => {
+		const response = await request(`localhost:${process.env.PORT}`).delete(
+			`/character/${characters[1].id}`,
+		);
+
+		expect(response.statusCode).toBe(200);
+	});
+});
