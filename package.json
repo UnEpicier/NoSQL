@@ -7,7 +7,7 @@
 		"dev": "cross-env NODE_ENV=development nodemon --watch src -e js,ts,json --exec \"ts-node src/index.ts\"",
 		"build": "npx tsup src/index.ts --format cjs --clean",
 		"start": "node build/index.js",
-		"test": "jest"
+		"test": "jest --runInBand"
 	},
 	"license": "UNLICENSED",
 	"dependencies": {

@@ -1,5 +1,9 @@
 import { Request, Response } from 'express';
-import { getAllCharactersInDB, getCharacterInDB } from './character.services';
+import {
+	createCharacterInDB,
+	getAllCharactersInDB,
+	getCharacterInDB,
+} from './character.services';
 
 const getAllCharacters = async (_: Request, res: Response) => {
 	try {
@@ -10,7 +14,7 @@ const getAllCharacters = async (_: Request, res: Response) => {
 			return;
 		}
 
-		res.status(204).send([]);
+		res.status(204).json([]);
 		return;
 	} catch {
 		res.status(500).end();
@@ -29,7 +33,7 @@ const getCharacter = async (req: Request, res: Response) => {
 			return;
 		}
 
-		res.status(200).send(character);
+		res.status(200).json(character);
 		return;
 	} catch {
 		res.status(500).end();
@@ -37,4 +41,28 @@ const getCharacter = async (req: Request, res: Response) => {
 	}
 };
 
-export { getAllCharacters, getCharacter };
+const createCharacter = async (req: Request, res: Response) => {
+	const { sprite, hp, attack, defense } = req.body || {};
+
+	if (!sprite || !hp || !attack || !defense) {
+		res.status(400).send('Missing field(s) in request body');
+		return;
+	}
+
+	try {
+		const character = await createCharacterInDB(
+			sprite,
+			hp,
+			attack,
+			defense,
+		);
+
+		res.status(200).json(character);
+		return;
+	} catch {
+		res.status(500).end();
+		return;
+	}
+};
+
+export { getAllCharacters, getCharacter, createCharacter };

@@ -1,3 +1,4 @@
+import { v4 } from 'uuid';
 import redisClient from '@utils/redis';
 import { Character } from '../types/character';
 
@@ -21,12 +22,12 @@ const getAllCharactersInDB = async (): Promise<Character[]> => {
 			}),
 		);
 
-		await redisClient.disconnect();
+		await redisClient.quit();
 
 		return characters;
 	} catch (error) {
 		console.error(error);
-		await redisClient.disconnect();
+		await redisClient.quit();
 
 		throw Error('Unable to get characters');
 	}
@@ -41,14 +42,14 @@ const getCharacterInDB = async (id: string): Promise<Character | null> => {
 		const exists = await redisClient.EXISTS(key);
 
 		if (exists == 0) {
-			await redisClient.disconnect();
+			await redisClient.quit();
 
 			return null;
 		}
 
 		const result = await redisClient.HGETALL(key);
 
-		await redisClient.disconnect();
+		await redisClient.quit();
 
 		return {
 			id: key,
@@ -59,10 +60,43 @@ const getCharacterInDB = async (id: string): Promise<Character | null> => {
 		};
 	} catch (error) {
 		console.error(error);
-		await redisClient.disconnect();
+		await redisClient.quit();
 
 		throw Error(`Unable to get character with id: ${id}`);
 	}
 };
 
-export { getAllCharactersInDB, getCharacterInDB };
+const createCharacterInDB = async (
+	sprite: string,
+	hp: number,
+	attack: number,
+	defense: number,
+): Promise<Character> => {
+	try {
+		const key = `character:${v4()}`;
+
+		await redisClient.connect();
+
+		await redisClient.HSET(key, 'sprite', sprite);
+		await redisClient.HSET(key, 'hp', hp);
+		await redisClient.HSET(key, 'attack', attack);
+		await redisClient.HSET(key, 'defense', defense);
+
+		await redisClient.quit();
+
+		return {
+			id: key,
+			sprite: sprite,
+			hp: hp,
+			attack: attack,
+			defense: defense,
+		};
+	} catch (error) {
+		console.error(error);
+		await redisClient.quit();
+
+		throw Error(`Unable to create character`);
+	}
+};
+
+export { getAllCharactersInDB, getCharacterInDB, createCharacterInDB };

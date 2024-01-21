@@ -20,12 +20,12 @@ const getAllShopItemsDB = async (): Promise<ShopItem[]> => {
 			}),
 		);
 
-		await redisClient.disconnect();
+		await redisClient.quit();
 
 		return shopItems;
 	} catch (error) {
 		console.error(error);
-		await redisClient.disconnect();
+		await redisClient.quit();
 
 		throw Error('Unable to get shop items');
 	}
@@ -40,14 +40,14 @@ const getShopItemDB = async (id: string): Promise<ShopItem | null> => {
 		const exists = await redisClient.EXISTS(key);
 
 		if (exists == 0) {
-			await redisClient.disconnect();
+			await redisClient.quit();
 
 			return null;
 		}
 
 		const result = await redisClient.HGETALL(key);
 
-		await redisClient.disconnect();
+		await redisClient.quit();
 
 		return {
 			id: key,
@@ -56,7 +56,7 @@ const getShopItemDB = async (id: string): Promise<ShopItem | null> => {
 		};
 	} catch (error) {
 		console.error(error);
-		await redisClient.disconnect();
+		await redisClient.quit();
 
 		throw Error(`Unable to get shop item with id: ${id}`);
 	}
@@ -74,7 +74,7 @@ const createShopItemDB = async (
 		await redisClient.HSET(key, 'cost', cost);
 		await redisClient.HSET(key, 'sprite', sprite);
 
-		await redisClient.disconnect();
+		await redisClient.quit();
 
 		return {
 			id: key,
@@ -83,7 +83,7 @@ const createShopItemDB = async (
 		};
 	} catch (error) {
 		console.error(error);
-		await redisClient.disconnect();
+		await redisClient.quit();
 
 		throw Error('Unable to create shop item');
 	}
@@ -107,7 +107,7 @@ const updateShopItemDB = async (
 			await redisClient.HSET(key, 'sprite', sprite);
 		}
 
-		await redisClient.disconnect();
+		await redisClient.quit();
 
 		return {
 			id: key,
@@ -116,7 +116,7 @@ const updateShopItemDB = async (
 		};
 	} catch (error) {
 		console.error(error);
-		await redisClient.disconnect();
+		await redisClient.quit();
 
 		throw Error(`Unable to update shop item with id: ${id}`);
 	}
@@ -130,12 +130,12 @@ const deleteShopItemDB = async (id: string) => {
 
 		await redisClient.DEL(key);
 
-		await redisClient.disconnect();
+		await redisClient.quit();
 
 		return;
 	} catch (error) {
 		console.error(error);
-		await redisClient.disconnect();
+		await redisClient.quit();
 
 		throw Error(`Unable to delete shop item with id: ${id}`);
 	}

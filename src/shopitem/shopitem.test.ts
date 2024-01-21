@@ -18,7 +18,7 @@ describe('I. Create item', () => {
 		expect(response.statusCode).toBe(400);
 	});
 
-	it('02 POST   - Created field', async () => {
+	it('02 POST   - Created item', async () => {
 		const response = await request(`localhost:${process.env.PORT}`)
 			.post('/shopitem')
 			.send({

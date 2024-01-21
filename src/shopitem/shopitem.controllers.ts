@@ -18,7 +18,7 @@ const getAllShopItems = async (_: Request, res: Response) => {
 
 		res.status(204).send([]);
 		return;
-	} catch (error) {
+	} catch {
 		res.status(500).end();
 		return;
 	}
@@ -37,7 +37,7 @@ const getShopItem = async (req: Request, res: Response) => {
 
 		res.status(200).send(shopItem);
 		return;
-	} catch (error) {
+	} catch {
 		res.status(500).end();
 		return;
 	}
@@ -56,7 +56,7 @@ const createShopItem = async (req: Request, res: Response) => {
 
 		res.status(200).send(shopItem);
 		return;
-	} catch (error) {
+	} catch {
 		res.status(500).end();
 		return;
 	}
@@ -76,7 +76,7 @@ const updateShopItem = async (req: Request, res: Response) => {
 
 		res.status(200).send(shopItem);
 		return;
-	} catch (error) {
+	} catch {
 		res.status(500).end();
 		return;
 	}
@@ -89,7 +89,7 @@ const deleteShopItem = async (req: Request, res: Response) => {
 		await deleteShopItemDB(`${id}`);
 		res.status(200).end();
 		return;
-	} catch (error) {
+	} catch {
 		res.status(500).end();
 		return;
 	}
