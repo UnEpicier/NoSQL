@@ -38,31 +38,38 @@ describe('II. Get All Characters', () => {
 	it('01 GET    - Include created item', async () => {
 		const response = await request(`localhost:${process.env.PORT}`).get(
 			'/characters',
-			);
-			
-			const characters: Character[] = response.body;
-			
-			expect(characters.map((x) => x._id)).toContain(character._id);
-		});
+		);
+
+		const characters: Character[] = response.body;
+
+		expect(characters.map((x) => x._id)).toContain(character._id);
 	});
-	
-	describe('III. Update Character', () => {
-		it('01 PATCH  - Missing field', async () => {
-			const response = await request(`localhost:${process.env.PORT}`).patch(
-				`/character/${character._id}`,
-				);
-				
-				expect(response.statusCode).toBe(400);
+});
+
+describe('III. Update Character', () => {
+	it('01 PATCH  - Missing field', async () => {
+		const response = await request(`localhost:${process.env.PORT}`).patch(
+			`/character/${character._id}`,
+		);
+
+		expect(response.statusCode).toBe(400);
+	});
+
+	it('02 PATCH  - Update sprite', async () => {
+		const response = await request(`localhost:${process.env.PORT}`)
+			.patch(`/character/${character._id}`)
+			.send({
+				sprite: 'testimage.png',
 			});
-			
-			it('02 PATCH  - Update sprite', async () => {
-				const response = await request(`localhost:${process.env.PORT}`)
-				.patch(`/character/${character._id}`)
-				.send({
-					sprite: 'testimage.png',
-				});
-				
-				expect(response.body.sprite).toBe('testimage.png');
+
+		expect(response.body.sprite).toBe('testimage.png');
+	});
+
+	it('03 PATCH  - Update hp', async () => {
+		const response = await request(`localhost:${process.env.PORT}`)
+			.patch(`/character/${character._id}`)
+			.send({
+				hp: 200,
 			});
 			
 			it('03 PATCH  - Update hp', async () => {

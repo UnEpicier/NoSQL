@@ -1,46 +1,79 @@
-import { v4 } from 'uuid';
+// ----------------------------------------------------- Models --------------------------------------------------------
+import SummonPoolModel from '@models/SummonPool';
+// ---------------------------------------------------------------------------------------------------------------------
+
+// ------------------------------------------------------ Utils --------------------------------------------------------
 import redisClient from '@utils/redis';
+import { connectToDB } from '@utils/database';
+import { includes, isEqual } from 'lodash';
+// ---------------------------------------------------------------------------------------------------------------------
+
+// ------------------------------------------------------ Types --------------------------------------------------------
 import { SummonPool } from '../types/summonpool';
-import { Character } from '../types/character';
+// ---------------------------------------------------------------------------------------------------------------------
 
 const getAllSummonPoolsInDB = async (): Promise<SummonPool[]> => {
 	try {
 		await redisClient.connect();
 
-		const matchingKeys = await redisClient.KEYS('summonpool:*');
+		// Get all sotred summon pools in cache
+		const cacheKeys = await redisClient.KEYS('summonpool:*');
 
-		const summonPools: SummonPool[] = await Promise.all(
-			matchingKeys.map(async (key) => {
-				const result = await redisClient.HGETALL(key);
+		const cacheSummonPools: SummonPool[] = [];
 
-				const characters: string[] = JSON.parse(result.characters);
+		for (const key in cacheKeys) {
+			const summonPool = await redisClient.HGETALL(`summonpool:${key}`);
 
-				const populatedCharacters: Character[] = await Promise.all(
-					characters.map(async (character) => {
-						const result = await redisClient.HGETALL(character);
+			cacheSummonPools.push({
+				_id: key,
+				characters: JSON.parse(summonPool.characters),
+				cost: parseFloat(summonPool.cost),
+				duration: parseInt(summonPool.duration),
+			});
+		}
 
-						return {
-							_id: character,
-							sprite: result.sprite,
-							hp: parseInt(result.hp),
-							attack: parseFloat(result.attack),
-							defense: parseFloat(result.defense),
-						};
-					}),
-				);
+		// Get all stored summon pools in DB
+		const db = await connectToDB();
+		const dbSummonPools: SummonPool[] = await SummonPoolModel.find(
+			{},
+		).populate('characters');
 
-				return {
-					id: key,
-					characters: populatedCharacters,
-					cost: parseFloat(result.cost),
-					duration: parseInt(result.duration),
-				};
-			}),
+		// Determine which one need to be delete or updated
+		const toDeleteFromCache = cacheSummonPools.filter(
+			(x) => !includes(dbSummonPools, x),
+		);
+		const toAddInCache = dbSummonPools.filter(
+			(x) => !includes(cacheSummonPools, x),
 		);
 
+		// Delete old from cache
+		for (let i = 0; i < toDeleteFromCache.length; i++) {
+			await redisClient.DEL(`summonpool:${toDeleteFromCache[i]._id}`);
+		}
+
+		// Add new in cache
+		for (let i = 0; i < toAddInCache.length; i++) {
+			await redisClient.HSET(
+				`summonpool:${toAddInCache[i]._id}`,
+				'characters',
+				JSON.stringify(toAddInCache[i].characters),
+			);
+			await redisClient.HSET(
+				`summonpool:${toAddInCache[i]._id}`,
+				'cost',
+				toAddInCache[i].cost,
+			);
+			await redisClient.HSET(
+				`summonpool:${toAddInCache[i]._id}`,
+				'duration',
+				toAddInCache[i].duration,
+			);
+		}
+
+		await db.disconnect();
 		await redisClient.quit();
 
-		return summonPools;
+		return dbSummonPools;
 	} catch (error) {
 		console.error(error);
 		await redisClient.quit();
@@ -51,44 +84,49 @@ const getAllSummonPoolsInDB = async (): Promise<SummonPool[]> => {
 
 const getSummonPoolInDB = async (id: string): Promise<SummonPool | null> => {
 	try {
-		const key = id.includes('summonpool:') ? id : `summonpool:${id}`;
-
 		await redisClient.connect();
 
-		const exists = await redisClient.EXISTS(key);
+		// Try to get it from db
+		const db = await connectToDB();
 
-		if (exists == 0) {
-			await redisClient.quit();
+		const summonPool: SummonPool | null | undefined =
+			await SummonPoolModel.findById(id).populate('characters');
 
+		await db.disconnect();
+
+		// If it does not exists in DB, try delete it from cache
+		if (!summonPool) {
+			await redisClient.DEL(`summonpool:${id}`);
 			return null;
 		}
 
-		const result = await redisClient.HGETALL(key);
+		// Get from cache
+		const cacheSummonPool = await redisClient.HGETALL(`summonpool:${id}`);
 
-		const characters: string[] = JSON.parse(result.characters);
+		// If it does not exists in cache or if the cached one is not updated from DB
+		if (
+			(await redisClient.EXISTS(`summonpool:${id}`)) == 0 ||
+			!isEqual(cacheSummonPool, summonPool)
+		) {
+			// Set in cache
+			await redisClient.HSET(
+				`summonpool:${id}`,
+				'characters',
+				JSON.stringify(summonPool.characters),
+			);
+			await redisClient.HSET(`summonpool:${id}`, 'cost', summonPool.cost);
+			await redisClient.HSET(
+				`summonpool:${id}`,
+				'duration',
+				summonPool.duration,
+			);
 
-		const populatedCharacters: Character[] = await Promise.all(
-			characters.map(async (character) => {
-				const result = await redisClient.HGETALL(character);
-
-				return {
-					_id: character,
-					sprite: result.sprite,
-					hp: parseInt(result.hp),
-					attack: parseFloat(result.attack),
-					defense: parseFloat(result.defense),
-				};
-			}),
-		);
+			await redisClient.quit();
+			return summonPool;
+		}
 
 		await redisClient.quit();
-
-		return {
-			id: key,
-			characters: populatedCharacters,
-			cost: parseFloat(result.cost),
-			duration: parseInt(result.duration),
-		};
+		return summonPool;
 	} catch (error) {
 		console.error(error);
 		await redisClient.quit();
@@ -103,41 +141,21 @@ const createSummonPoolInDB = async (
 	duration: number,
 ): Promise<SummonPool> => {
 	try {
-		const key = `summonpool:${v4()}`;
+		const db = await connectToDB();
 
-		characters = characters.map((id) => {
-			return id.includes('character:') ? id : `character:${id}`;
+		const { _id } = await SummonPoolModel.create({
+			characters,
+			cost,
+			duration,
 		});
 
-		await redisClient.connect();
-
-		await redisClient.HSET(key, 'characters', JSON.stringify(characters));
-		await redisClient.HSET(key, 'cost', cost);
-		await redisClient.HSET(key, 'duration', duration);
-
-		// Populate characters array
-		const populatedCharacters: Character[] = await Promise.all(
-			characters.map(async (character) => {
-				const result = await redisClient.HGETALL(character);
-
-				return {
-					_id: character,
-					sprite: result.sprite,
-					hp: parseInt(result.hp),
-					attack: parseFloat(result.attack),
-					defense: parseFloat(result.defense),
-				};
-			}),
+		const summonPool = await SummonPoolModel.findById(_id).populate(
+			'characters',
 		);
 
-		await redisClient.quit();
+		await db.disconnect();
 
-		return {
-			id: key,
-			characters: populatedCharacters,
-			cost: cost,
-			duration: duration,
-		};
+		return summonPool;
 	} catch (error) {
 		console.error(error);
 		await redisClient.quit();
@@ -148,60 +166,25 @@ const createSummonPoolInDB = async (
 
 const updateSummonPoolInDB = async (
 	id: string,
-	characters: string[],
-	cost: number,
-	duration: number,
-): Promise<SummonPool> => {
+	fields: Object,
+): Promise<SummonPool | null> => {
 	try {
+		// Delete from cache
 		await redisClient.connect();
+		await redisClient.DEL(`summonpool:${id}`);
+		await redisClient.disconnect();
 
-		const key = id.includes('summonpool:') ? id : `summonpool:${id}`;
+		// Update in DB
+		const db = await connectToDB();
 
-		if (characters) {
-			await redisClient.HSET(
-				key,
-				'characters',
-				JSON.stringify(characters),
-			);
-		}
+		const summonPool: SummonPool | null | undefined =
+			await SummonPoolModel.findByIdAndUpdate(id, fields, {
+				new: true,
+			}).populate('characters');
 
-		if (cost) {
-			await redisClient.HSET(key, 'cost', cost);
-		}
+		await db.disconnect();
 
-		if (duration) {
-			await redisClient.HSET(key, 'duration', duration);
-		}
-
-		const result = await redisClient.HGETALL(key);
-
-		const chars: string[] = characters
-			? characters
-			: JSON.parse(result.characters);
-
-		// Populate characters array
-		const populatedCharacters: Character[] = await Promise.all(
-			chars.map(async (character) => {
-				const result = await redisClient.HGETALL(character);
-
-				return {
-					_id: character,
-					sprite: result.sprite,
-					hp: parseInt(result.hp),
-					attack: parseFloat(result.attack),
-					defense: parseFloat(result.defense),
-				};
-			}),
-		);
-
-		await redisClient.quit();
-
-		return {
-			id: key,
-			characters: populatedCharacters,
-			cost: parseFloat(result.cost),
-			duration: parseInt(result.duration),
-		};
+		return summonPool ? summonPool : null;
 	} catch (error) {
 		console.error(error);
 		await redisClient.quit();
@@ -212,13 +195,15 @@ const updateSummonPoolInDB = async (
 
 const deleteSummonPoolInDB = async (id: string): Promise<void> => {
 	try {
-		const key = id.includes('summonpool:') ? id : `summonpool:${id}`;
-
+		// Delete from cache
 		await redisClient.connect();
-
-		await redisClient.DEL(key);
-
+		await redisClient.DEL(`summonpool:${id}`);
 		await redisClient.quit();
+
+		// Delete from DB
+		const db = await connectToDB();
+		SummonPoolModel.findByIdAndDelete(id);
+		await db.disconnect();
 	} catch (error) {
 		console.error(error);
 		await redisClient.quit();

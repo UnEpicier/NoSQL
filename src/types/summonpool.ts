@@ -1,8 +1,8 @@
 import { Character } from './character';
 
 export interface SummonPool {
-	id: string;
-	characters: Character[];
+	_id: string;
+	characters: Character[] | string[];
 	cost: number;
 	duration: number;
 }

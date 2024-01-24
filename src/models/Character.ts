@@ -2,11 +2,11 @@ import { Schema, model, models } from 'mongoose';
 
 const CharacterSchema = new Schema(
 	{
-    attack: {
+		attack: {
 			type: Number,
 			required: true,
 		},
-    defense: {
+		defense: {
 			type: Number,
 			required: true,
 		},

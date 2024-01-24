@@ -84,13 +84,14 @@ const updateSummonPool = async (req: Request, res: Response) => {
 		return;
 	}
 
+	const fields: any = {};
+
+	if (characters) fields['characters'] = characters;
+	if (cost) fields['cost'] = cost;
+	if (duration) fields['duration'] = duration;
+
 	try {
-		const summonPool = await updateSummonPoolInDB(
-			id,
-			characters,
-			cost,
-			duration,
-		);
+		const summonPool = await updateSummonPoolInDB(id, fields);
 
 		res.status(200).send(summonPool);
 		return;

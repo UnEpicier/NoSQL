@@ -3,17 +3,15 @@
 // ------------------------------------------------------ Types --------------------------------------------------------
 import redisClient from '@utils/redis';
 import { Character } from '../types/character';
-import CharacterModel from '@models/Character'
+import CharacterModel from '@models/Character';
 import { connectToDB } from '@utils/database';
 
 const getAllCharactersInDB = async (): Promise<Character[]> => {
 	try {
 		// Get all stored characters in DB
 		const db = await connectToDB();
-		const dbCharacter: Character[] = await CharacterModel.find(
-			{},
-			);
-			
+		const dbCharacter: Character[] = await CharacterModel.find({});
+
 		await redisClient.connect();
 		// Add new in cache
 		for (let i = 0; i < dbCharacter.length; i++) {
@@ -53,9 +51,9 @@ const getAllCharactersInDB = async (): Promise<Character[]> => {
 
 const getCharacterInDB = async (id: string): Promise<Character | null> => {
 	if (id.length != 24) {
-		return null
+		return null;
 	}
-	try {	
+	try {
 		// Get from cache
 		await redisClient.connect();
 		if ((await redisClient.EXISTS(`character:${id}`)) == 0) {
@@ -63,7 +61,7 @@ const getCharacterInDB = async (id: string): Promise<Character | null> => {
 			redisClient.quit();
 			const db = await connectToDB();
 			const character: Character | null | undefined =
-			await CharacterModel.findById(id);
+				await CharacterModel.findById(id);
 			await db.disconnect();
 			return character ? character : null;
 		}
@@ -75,19 +73,16 @@ const getCharacterInDB = async (id: string): Promise<Character | null> => {
 			defense: parseInt(cacheCharacter.defense),
 			hp: parseInt(cacheCharacter.hp),
 			sprite: cacheCharacter.sprite,
-		}
+		};
 		return character ? character : null;
-
 	} catch (error) {
 		console.error(error);
 		throw Error(`Unable to get character with id: ${id}`);
 	}
 };
 
-const createCharacterInDB = async (
-	fields: Object,
-): Promise<Character> => {
-try {
+const createCharacterInDB = async (fields: Object): Promise<Character> => {
+	try {
 		const db = await connectToDB();
 
 		const { _id } = await CharacterModel.create(fields);
@@ -117,9 +112,9 @@ const updateCharacterInDB = async (
 		// Update in DB
 		const db = await connectToDB();
 		const character: Character | null | undefined =
-		await CharacterModel.findByIdAndUpdate(id, fields, {
-			new: true,
-		});
+			await CharacterModel.findByIdAndUpdate(id, fields, {
+				new: true,
+			});
 
 		await db.disconnect();
 
@@ -133,20 +128,20 @@ const updateCharacterInDB = async (
 };
 
 const deleteCharacterInDB = async (id: string): Promise<void> => {
-    try {
-        await redisClient.connect();
-        await redisClient.DEL(id);
-        await redisClient.quit();
+	try {
+		await redisClient.connect();
+		await redisClient.DEL(id);
+		await redisClient.quit();
 
-        const db = await connectToDB();
-        await CharacterModel.findByIdAndDelete(id);
-        await db.disconnect();
-    } catch (error) {
-        console.error(error);
-        await redisClient.quit();
+		const db = await connectToDB();
+		await CharacterModel.findByIdAndDelete(id);
+		await db.disconnect();
+	} catch (error) {
+		console.error(error);
+		await redisClient.quit();
 
-        throw new Error(`Unable to delete character with id: ${id}`);
-    }
+		throw new Error(`Unable to delete character with id: ${id}`);
+	}
 };
 
 export {

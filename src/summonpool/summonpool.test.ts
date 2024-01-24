@@ -57,7 +57,7 @@ describe('I. Create summonPool', () => {
 		const response = await request(`localhost:${process.env.PORT}`)
 			.post('/summonpool')
 			.send({
-				characters: characters.map((character) => character.id),
+				characters: characters.map((character) => character._id),
 				cost: 10,
 				duration: 60000,
 			});
@@ -76,14 +76,14 @@ describe('II. Get All Summon Pools', () => {
 
 		const summonPools: SummonPool[] = response.body;
 
-		expect(summonPools.map((x) => x.id)).toContain(summonPool.id);
+		expect(summonPools.map((x) => x._id)).toContain(summonPool._id);
 	});
 });
 
 describe('III. Update Summon Pool', () => {
 	it('01 PATCH  - Missing field', async () => {
 		const response = await request(`localhost:${process.env.PORT}`).patch(
-			`/summonpool/${summonPool.id}`,
+			`/summonpool/${summonPool._id}`,
 		);
 
 		expect(response.statusCode).toBe(400);
@@ -91,9 +91,9 @@ describe('III. Update Summon Pool', () => {
 
 	it('02 PATCH  - Update characters', async () => {
 		const response = await request(`localhost:${process.env.PORT}`)
-			.patch(`/summonpool/${summonPool.id}`)
+			.patch(`/summonpool/${summonPool._id}`)
 			.send({
-				characters: [characters[0].id],
+				characters: [characters[0]._id],
 			});
 
 		expect(response.body.characters.length).toBe(1);
@@ -101,7 +101,7 @@ describe('III. Update Summon Pool', () => {
 
 	it('03 PATCH  - Update cost', async () => {
 		const response = await request(`localhost:${process.env.PORT}`)
-			.patch(`/summonpool/${summonPool.id}`)
+			.patch(`/summonpool/${summonPool._id}`)
 			.send({
 				cost: 100,
 			});
@@ -111,7 +111,7 @@ describe('III. Update Summon Pool', () => {
 
 	it('04 PATCH  - Update duration', async () => {
 		const response = await request(`localhost:${process.env.PORT}`)
-			.patch(`/summonpool/${summonPool.id}`)
+			.patch(`/summonpool/${summonPool._id}`)
 			.send({
 				duration: 10000,
 			});
@@ -121,9 +121,9 @@ describe('III. Update Summon Pool', () => {
 
 	it('05 PATCH  - Update all', async () => {
 		const response = await request(`localhost:${process.env.PORT}`)
-			.patch(`/summonpool/${summonPool.id}`)
+			.patch(`/summonpool/${summonPool._id}`)
 			.send({
-				characters: [characters[1].id],
+				characters: [characters[1]._id],
 				cost: 1,
 				duration: 2,
 			});
@@ -139,7 +139,7 @@ describe('III. Update Summon Pool', () => {
 describe('IV. Get Updated Summon Pool', () => {
 	it('01 GET    - Wrong Summon Pool', async () => {
 		const response = await request(`localhost:${process.env.PORT}`).get(
-			`/summonpool/12345`,
+			`/summonpool/65b1156b03b0b6b17baf2e39`,
 		);
 
 		expect(response.statusCode).toBe(404);
@@ -147,7 +147,7 @@ describe('IV. Get Updated Summon Pool', () => {
 
 	it('02 GET    - Get Summon Pool', async () => {
 		const response = await request(`localhost:${process.env.PORT}`).get(
-			`/summonpool/${summonPool.id}`,
+			`/summonpool/${summonPool._id}`,
 		);
 
 		expect(response.statusCode).toBe(200);
@@ -157,7 +157,7 @@ describe('IV. Get Updated Summon Pool', () => {
 describe('V. Delete Summon Pool', () => {
 	it('01 DEL    - Delete summon pool', async () => {
 		const response = await request(`localhost:${process.env.PORT}`).delete(
-			`/summonpool/${summonPool.id}`,
+			`/summonpool/${summonPool._id}`,
 		);
 
 		expect(response.statusCode).toBe(200);
@@ -165,7 +165,7 @@ describe('V. Delete Summon Pool', () => {
 
 	it('02 DEL    - Delete first character', async () => {
 		const response = await request(`localhost:${process.env.PORT}`).delete(
-			`/character/${characters[0].id}`,
+			`/character/${characters[0]._id}`,
 		);
 
 		expect(response.statusCode).toBe(200);
@@ -173,7 +173,7 @@ describe('V. Delete Summon Pool', () => {
 
 	it('03 DEL    - Delete second character', async () => {
 		const response = await request(`localhost:${process.env.PORT}`).delete(
-			`/character/${characters[1].id}`,
+			`/character/${characters[1]._id}`,
 		);
 
 		expect(response.statusCode).toBe(200);
