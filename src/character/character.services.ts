@@ -1,30 +1,46 @@
-import { v4 } from 'uuid';
 import redisClient from '@utils/redis';
 import { Character } from '../types/character';
+import CharacterModel from '@models/Character'
+import { connectToDB } from '@utils/database';
+import { includes } from 'lodash';
 
 const getAllCharactersInDB = async (): Promise<Character[]> => {
 	try {
+		// Get all stored characters in DB
+		const db = await connectToDB();
+		const dbCharacter: Character[] = await CharacterModel.find(
+			{},
+			);
+			
 		await redisClient.connect();
+		// Add new in cache
+		for (let i = 0; i < dbCharacter.length; i++) {
+			await redisClient.HSET(
+				`character:${dbCharacter[i]._id}`,
+				'attack',
+				dbCharacter[i].attack,
+			);
+			await redisClient.HSET(
+				`character:${dbCharacter[i]._id}`,
+				'defense',
+				dbCharacter[i].defense,
+			);
+			await redisClient.HSET(
+				`character:${dbCharacter[i]._id}`,
+				'hp',
+				dbCharacter[i].hp,
+			);
+			await redisClient.HSET(
+				`character:${dbCharacter[i]._id}`,
+				'sprite',
+				dbCharacter[i].sprite,
+			);
+		}
 
-		const matchingKeys = await redisClient.KEYS('character:*');
-
-		const characters: Character[] = await Promise.all(
-			matchingKeys.map(async (key) => {
-				const result = await redisClient.HGETALL(key);
-
-				return {
-					id: key,
-					sprite: result.sprite,
-					hp: parseInt(result.hp),
-					attack: parseFloat(result.attack),
-					defense: parseFloat(result.defense),
-				};
-			}),
-		);
-
+		await db.disconnect();
 		await redisClient.quit();
 
-		return characters;
+		return dbCharacter;
 	} catch (error) {
 		console.error(error);
 		await redisClient.quit();
@@ -34,66 +50,53 @@ const getAllCharactersInDB = async (): Promise<Character[]> => {
 };
 
 const getCharacterInDB = async (id: string): Promise<Character | null> => {
-	try {
-		const key = id.includes('character:') ? id : `character:${id}`;
-
+	if (id.length != 24) {
+		return null
+	}
+	try {	
+		// Get from cache
 		await redisClient.connect();
-
-		const exists = await redisClient.EXISTS(key);
-
-		if (exists == 0) {
-			await redisClient.quit();
-
-			return null;
+		if ((await redisClient.EXISTS(`character:${id}`)) == 0) {
+			// Try to get it from db
+			redisClient.quit();
+			const db = await connectToDB();
+			const character: Character | null | undefined =
+			await CharacterModel.findById(id);
+			await db.disconnect();
+			return character ? character : null;
 		}
-
-		const result = await redisClient.HGETALL(key);
-
+		const cacheCharacter = await redisClient.HGETALL(`character:${id}`);
 		await redisClient.quit();
+		const character: Character = {
+			_id: id,
+			attack: parseInt(cacheCharacter.attack),
+			defense: parseInt(cacheCharacter.defense),
+			hp: parseInt(cacheCharacter.hp),
+			sprite: cacheCharacter.sprite,
+		}
+		return character ? character : null;
 
-		return {
-			id: key,
-			sprite: result.sprite,
-			hp: parseInt(result.hp),
-			attack: parseFloat(result.attack),
-			defense: parseFloat(result.defense),
-		};
 	} catch (error) {
 		console.error(error);
-		await redisClient.quit();
-
 		throw Error(`Unable to get character with id: ${id}`);
 	}
 };
 
 const createCharacterInDB = async (
-	sprite: string,
-	hp: number,
-	attack: number,
-	defense: number,
+	fields: Object,
 ): Promise<Character> => {
-	try {
-		const key = `character:${v4()}`;
+try {
+		const db = await connectToDB();
 
-		await redisClient.connect();
+		const { _id } = await CharacterModel.create(fields);
 
-		await redisClient.HSET(key, 'sprite', sprite);
-		await redisClient.HSET(key, 'hp', hp);
-		await redisClient.HSET(key, 'attack', attack);
-		await redisClient.HSET(key, 'defense', defense);
+		const character = await CharacterModel.findById(_id);
 
-		await redisClient.quit();
+		await db.disconnect();
 
-		return {
-			id: key,
-			sprite: sprite,
-			hp: hp,
-			attack: attack,
-			defense: defense,
-		};
+		return character;
 	} catch (error) {
 		console.error(error);
-		await redisClient.quit();
 
 		throw Error(`Unable to create character`);
 	}
@@ -101,62 +104,43 @@ const createCharacterInDB = async (
 
 const updateCharacterInDB = async (
 	id: string,
-	sprite: string,
-	hp: number,
-	attack: number,
-	defense: number,
-): Promise<Character> => {
+	fields: Object,
+): Promise<Character | null> => {
 	try {
+		// Delete from cache
 		await redisClient.connect();
-
-		const key = id.includes('character:') ? id : `character:${id}`;
-
-		if (sprite) {
-			await redisClient.HSET(key, 'sprite', sprite);
-		}
-
-		if (hp) {
-			await redisClient.HSET(key, 'hp', hp);
-		}
-
-		if (attack) {
-			await redisClient.HSET(key, 'attack', attack);
-		}
-
-		if (defense) {
-			await redisClient.HSET(key, 'defense', defense);
-		}
-
-		const result = await redisClient.HGETALL(key);
-
+		await redisClient.DEL(`character:${id}`);
 		await redisClient.quit();
 
-		return {
-			id: key,
-			sprite: result.sprite,
-			hp: parseInt(result.hp),
-			attack: parseFloat(result.attack),
-			defense: parseFloat(result.defense),
-		};
+		// Update in DB
+		const db = await connectToDB();
+		const character: Character | null | undefined =
+		await CharacterModel.findByIdAndUpdate(id, fields, {
+			new: true,
+		});
+
+		await db.disconnect();
+
+		return character ? character : null;
 	} catch (error) {
 		console.error(error);
 		await redisClient.quit();
 
-		throw Error(`Unable to update character with it: ${id}`);
+		throw Error(`Unable to update character with id: ${id}`);
 	}
 };
 
-const deleteCharacterInDB = async (id: string) => {
+const deleteCharacterInDB = async (id: string): Promise<void> => {
 	try {
-		const key = id.includes('character:') ? id : `character:${id}`;
-
+		// Delete from cache
 		await redisClient.connect();
-
-		await redisClient.DEL(key);
-
+		await redisClient.DEL(`character:${id}`);
 		await redisClient.quit();
 
-		return;
+		// Delete from DB
+		const db = await connectToDB();
+		CharacterModel.findByIdAndDelete(id);
+		await db.disconnect();
 	} catch (error) {
 		console.error(error);
 		await redisClient.quit();
@@ -166,9 +150,9 @@ const deleteCharacterInDB = async (id: string) => {
 };
 
 export {
+	createCharacterInDB,
+	deleteCharacterInDB,
 	getAllCharactersInDB,
 	getCharacterInDB,
-	createCharacterInDB,
 	updateCharacterInDB,
-	deleteCharacterInDB,
 };

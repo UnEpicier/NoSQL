@@ -20,7 +20,7 @@ const getAllSummonPoolsInDB = async (): Promise<SummonPool[]> => {
 						const result = await redisClient.HGETALL(character);
 
 						return {
-							id: character,
+							_id: character,
 							sprite: result.sprite,
 							hp: parseInt(result.hp),
 							attack: parseFloat(result.attack),
@@ -72,7 +72,7 @@ const getSummonPoolInDB = async (id: string): Promise<SummonPool | null> => {
 				const result = await redisClient.HGETALL(character);
 
 				return {
-					id: character,
+					_id: character,
 					sprite: result.sprite,
 					hp: parseInt(result.hp),
 					attack: parseFloat(result.attack),
@@ -121,7 +121,7 @@ const createSummonPoolInDB = async (
 				const result = await redisClient.HGETALL(character);
 
 				return {
-					id: character,
+					_id: character,
 					sprite: result.sprite,
 					hp: parseInt(result.hp),
 					attack: parseFloat(result.attack),
@@ -185,7 +185,7 @@ const updateSummonPoolInDB = async (
 				const result = await redisClient.HGETALL(character);
 
 				return {
-					id: character,
+					_id: character,
 					sprite: result.sprite,
 					hp: parseInt(result.hp),
 					attack: parseFloat(result.attack),

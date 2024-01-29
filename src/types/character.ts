@@ -1,5 +1,5 @@
 export interface Character {
-	id: string;
+	_id: string;
 	sprite: string;
 	hp: number;
 	attack: number;

@@ -29,7 +29,7 @@ describe('I. Create character', () => {
 			});
 
 		character = response.body;
-
+		
 		expect(response.statusCode).toBe(200);
 	});
 });
@@ -38,46 +38,46 @@ describe('II. Get All Characters', () => {
 	it('01 GET    - Include created item', async () => {
 		const response = await request(`localhost:${process.env.PORT}`).get(
 			'/characters',
-		);
-
-		const characters: Character[] = response.body;
-
-		expect(characters.map((x) => x.id)).toContain(character.id);
+			);
+			
+			const characters: Character[] = response.body;
+			
+			expect(characters.map((x) => x._id)).toContain(character._id);
+		});
 	});
-});
-
-describe('III. Update Character', () => {
-	it('01 PATCH  - Missing field', async () => {
-		const response = await request(`localhost:${process.env.PORT}`).patch(
-			`/character/${character.id}`,
-		);
-
-		expect(response.statusCode).toBe(400);
-	});
-
-	it('02 PATCH  - Update sprite', async () => {
-		const response = await request(`localhost:${process.env.PORT}`)
-			.patch(`/character/${character.id}`)
-			.send({
-				sprite: 'testimage.png',
+	
+	describe('III. Update Character', () => {
+		it('01 PATCH  - Missing field', async () => {
+			const response = await request(`localhost:${process.env.PORT}`).patch(
+				`/character/${character._id}`,
+				);
+				
+				expect(response.statusCode).toBe(400);
 			});
-
-		expect(response.body.sprite).toBe('testimage.png');
-	});
-
-	it('03 PATCH  - Update hp', async () => {
-		const response = await request(`localhost:${process.env.PORT}`)
-			.patch(`/character/${character.id}`)
-			.send({
-				hp: 200,
+			
+			it('02 PATCH  - Update sprite', async () => {
+				const response = await request(`localhost:${process.env.PORT}`)
+				.patch(`/character/${character._id}`)
+				.send({
+					sprite: 'testimage.png',
+				});
+				
+				expect(response.body.sprite).toBe('testimage.png');
 			});
+			
+			it('03 PATCH  - Update hp', async () => {
+				const response = await request(`localhost:${process.env.PORT}`)
+				.patch(`/character/${character._id}`)
+				.send({
+					hp: 200,
+				});
 
 		expect(response.body.hp).toBe(200);
 	});
 
 	it('04 PATCH  - Update attack', async () => {
 		const response = await request(`localhost:${process.env.PORT}`)
-			.patch(`/character/${character.id}`)
+			.patch(`/character/${character._id}`)
 			.send({
 				attack: 200,
 			});
@@ -87,7 +87,7 @@ describe('III. Update Character', () => {
 
 	it('05 PATCH  - Update defense', async () => {
 		const response = await request(`localhost:${process.env.PORT}`)
-			.patch(`/character/${character.id}`)
+			.patch(`/character/${character._id}`)
 			.send({
 				defense: 50,
 			});
@@ -97,7 +97,7 @@ describe('III. Update Character', () => {
 
 	it('06 PATCH  - Update all', async () => {
 		const response = await request(`localhost:${process.env.PORT}`)
-			.patch(`/character/${character.id}`)
+			.patch(`/character/${character._id}`)
 			.send({
 				sprite: 'all.png',
 				hp: 2000,
@@ -125,7 +125,7 @@ describe('IV. Get updated character', () => {
 
 	it('02. GET    - Get character', async () => {
 		const response = await request(`localhost:${process.env.PORT}`).get(
-			`/character/${character.id}`,
+			`/character/${character._id}`,
 		);
 
 		expect(response.statusCode).toBe(200);
@@ -135,7 +135,7 @@ describe('IV. Get updated character', () => {
 describe('V. Delete character', () => {
 	it('01 DEL    - Delete character', async () => {
 		const response = await request(`localhost:${process.env.PORT}`).del(
-			`/character/${character.id}`,
+			`/character/${character._id}`,
 		);
 
 		expect(response.statusCode).toBe(200);
