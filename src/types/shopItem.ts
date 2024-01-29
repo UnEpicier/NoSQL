@@ -1,5 +1,10 @@
 export interface ShopItem {
-	id: string;
+	_id: string;
+	cost: number;
+	sprite: string;
+}
+
+export interface ShopItemProperties {
 	cost: number;
 	sprite: string;
 }
