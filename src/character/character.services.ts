@@ -1,154 +1,135 @@
-// ----------------------------------------------------- Models --------------------------------------------------------
-import CharacterModel from '@models/Character';
-// ---------------------------------------------------------------------------------------------------------------------
-
-// ------------------------------------------------------ Utils --------------------------------------------------------
-import redisClient from '@utils/redis';
-import { connectToDB } from '@utils/database';
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ------------------------------------------------------ Types --------------------------------------------------------
+import redisClient from '@utils/redis';
 import { Character } from '../types/character';
-// ---------------------------------------------------------------------------------------------------------------------
+import CharacterModel from '@models/Character'
+import { connectToDB } from '@utils/database';
 
 const getAllCharactersInDB = async (): Promise<Character[]> => {
-    try {
-        await redisClient.connect();
+	try {
+		// Get all stored characters in DB
+		const db = await connectToDB();
+		const dbCharacter: Character[] = await CharacterModel.find(
+			{},
+			);
+			
+		await redisClient.connect();
+		// Add new in cache
+		for (let i = 0; i < dbCharacter.length; i++) {
+			await redisClient.HSET(
+				`character:${dbCharacter[i]._id}`,
+				'attack',
+				dbCharacter[i].attack,
+			);
+			await redisClient.HSET(
+				`character:${dbCharacter[i]._id}`,
+				'defense',
+				dbCharacter[i].defense,
+			);
+			await redisClient.HSET(
+				`character:${dbCharacter[i]._id}`,
+				'hp',
+				dbCharacter[i].hp,
+			);
+			await redisClient.HSET(
+				`character:${dbCharacter[i]._id}`,
+				'sprite',
+				dbCharacter[i].sprite,
+			);
+		}
 
-        const cacheKeys = await redisClient.KEYS('character:*');
+		await db.disconnect();
+		await redisClient.quit();
 
-        const cacheCharacters: Character[] = [];
+		return dbCharacter;
+	} catch (error) {
+		console.error(error);
+		await redisClient.quit();
 
-        for (const key of cacheKeys) {
-            const character = await redisClient.HGETALL(key);
-
-            cacheCharacters.push({
-                id: key,
-                sprite: character.sprite,
-                hp: parseInt(character.hp),
-                attack: parseFloat(character.attack),
-                defense: parseFloat(character.defense),
-            });
-        }
-
-        const db = await connectToDB();
-        const dbCharacters: Character[] = await CharacterModel.find({});
-
-        const toDeleteFromCache = cacheCharacters.filter((x) => !includes(dbCharacters, x));
-        const toAddInCache = dbCharacters.filter((x) => !includes(cacheCharacters, x));
-
-        for (const character of toDeleteFromCache) {
-            await redisClient.DEL(character.id);
-        }
-
-        for (const character of toAddInCache) {
-            await redisClient.HSET(character.id, 'sprite', character.sprite);
-            await redisClient.HSET(character.id, 'hp', character.hp.toString());
-            await redisClient.HSET(character.id, 'attack', character.attack.toString());
-            await redisClient.HSET(character.id, 'defense', character.defense.toString());
-        }
-
-        await db.disconnect();
-        await redisClient.quit();
-
-        return dbCharacters;
-    } catch (error) {
-        console.error(error);
-        await redisClient.quit();
-
-        throw new Error('Unable to get characters');
-    }
+		throw Error('Unable to get characters');
+	}
 };
 
 const getCharacterInDB = async (id: string): Promise<Character | null> => {
-    try {
-        await redisClient.connect();
+	if (id.length != 24) {
+		return null
+	}
+	try {	
+		// Get from cache
+		await redisClient.connect();
+		if ((await redisClient.EXISTS(`character:${id}`)) == 0) {
+			// Try to get it from db
+			redisClient.quit();
+			const db = await connectToDB();
+			const character: Character | null | undefined =
+			await CharacterModel.findById(id);
+			await db.disconnect();
+			return character ? character : null;
+		}
+		const cacheCharacter = await redisClient.HGETALL(`character:${id}`);
+		await redisClient.quit();
+		const character: Character = {
+			_id: id,
+			attack: parseInt(cacheCharacter.attack),
+			defense: parseInt(cacheCharacter.defense),
+			hp: parseInt(cacheCharacter.hp),
+			sprite: cacheCharacter.sprite,
+		}
+		return character ? character : null;
 
-        const db = await connectToDB();
-
-        const character: Character | null | undefined = await CharacterModel.findById(id);
-
-        await db.disconnect();
-
-        if (!character) {
-            await redisClient.DEL(id);
-            return null;
-        }
-
-        const cacheCharacter = await redisClient.HGETALL(id);
-
-        if ((await redisClient.EXISTS(id)) == 0 || !isEqual(cacheCharacter, character)) {
-            await redisClient.HSET(id, 'sprite', character.sprite);
-            await redisClient.HSET(id, 'hp', character.hp.toString());
-            await redisClient.HSET(id, 'attack', character.attack.toString());
-            await redisClient.HSET(id, 'defense', character.defense.toString());
-
-            await redisClient.quit();
-            return character;
-        }
-
-        await redisClient.quit();
-        return character;
-    } catch (error) {
-        console.error(error);
-        await redisClient.quit();
-
-        throw new Error(`Unable to get character with id: ${id}`);
-    }
+	} catch (error) {
+		console.error(error);
+		throw Error(`Unable to get character with id: ${id}`);
+	}
 };
 
 const createCharacterInDB = async (
-    sprite: string,
-    hp: number,
-    attack: number,
-    defense: number,
+	fields: Object,
 ): Promise<Character> => {
-    try {
-        const db = await connectToDB();
+try {
+		const db = await connectToDB();
 
-        const character = new CharacterModel({
-            sprite,
-            hp,
-            attack,
-            defense,
-        });
+		const { _id } = await CharacterModel.create(fields);
 
-        await character.save();
-        await db.disconnect();
+		const character = await CharacterModel.findById(_id);
 
-        return character;
-    } catch (error) {
-        console.error(error);
-        await redisClient.quit();
+		await db.disconnect();
 
-        throw new Error(`Unable to create character`);
-    }
+		return character;
+	} catch (error) {
+		console.error(error);
+
+		throw Error(`Unable to create character`);
+	}
 };
 
 const updateCharacterInDB = async (
-    id: string,
-    fields: Object,
+	id: string,
+	fields: Object,
 ): Promise<Character | null> => {
-    try {
-        await redisClient.connect();
-        await redisClient.DEL(id);
-        await redisClient.disconnect();
+	try {
+		// Delete from cache
+		await redisClient.connect();
+		await redisClient.DEL(`character:${id}`);
+		await redisClient.quit();
 
-        const db = await connectToDB();
+		// Update in DB
+		const db = await connectToDB();
+		const character: Character | null | undefined =
+		await CharacterModel.findByIdAndUpdate(id, fields, {
+			new: true,
+		});
 
-        const character: Character | null | undefined = await CharacterModel.findByIdAndUpdate(id, fields, {
-            new: true,
-        });
+		await db.disconnect();
 
-        await db.disconnect();
+		return character ? character : null;
+	} catch (error) {
+		console.error(error);
+		await redisClient.quit();
 
-        return character ? character : null;
-    } catch (error) {
-        console.error(error);
-        await redisClient.quit();
-
-        throw new Error(`Unable to update character with id: ${id}`);
-    }
+		throw Error(`Unable to update character with id: ${id}`);
+	}
 };
 
 const deleteCharacterInDB = async (id: string): Promise<void> => {
@@ -169,9 +150,9 @@ const deleteCharacterInDB = async (id: string): Promise<void> => {
 };
 
 export {
-    getAllCharactersInDB,
-    getCharacterInDB,
-    createCharacterInDB,
-    updateCharacterInDB,
-    deleteCharacterInDB,
+	createCharacterInDB,
+	deleteCharacterInDB,
+	getAllCharactersInDB,
+	getCharacterInDB,
+	updateCharacterInDB,
 };

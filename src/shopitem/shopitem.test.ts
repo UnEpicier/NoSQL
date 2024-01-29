@@ -40,14 +40,14 @@ describe('II. Get All Items', () => {
 
 		const shopItems: ShopItem[] = response.body;
 
-		expect(shopItems.map((x) => x.id)).toContain(item.id);
+		expect(shopItems.map((x) => x._id)).toContain(item._id);
 	});
 });
 
 describe('III. Update Item', () => {
 	it('01 PATCH  - Missing field', async () => {
 		const response = await request(`localhost:${process.env.PORT}`).patch(
-			`/shopitem/${item.id}`,
+			`/shopitem/${item._id}`,
 		);
 
 		expect(response.statusCode).toBe(400);
@@ -55,7 +55,7 @@ describe('III. Update Item', () => {
 
 	it('02 PATCH  - Update cost', async () => {
 		const response = await request(`localhost:${process.env.PORT}`)
-			.patch(`/shopitem/${item.id}`)
+			.patch(`/shopitem/${item._id}`)
 			.send({
 				cost: 100,
 			});
@@ -65,7 +65,7 @@ describe('III. Update Item', () => {
 
 	it('03 PATCH  - Update sprite', async () => {
 		const response = await request(`localhost:${process.env.PORT}`)
-			.patch(`/shopitem/${item.id}`)
+			.patch(`/shopitem/${item._id}`)
 			.send({
 				sprite: 'testimage.png',
 			});
@@ -75,14 +75,14 @@ describe('III. Update Item', () => {
 
 	it('04 PATCH  - Update all', async () => {
 		const response = await request(`localhost:${process.env.PORT}`)
-			.patch(`/shopitem/${item.id}`)
+			.patch(`/shopitem/${item._id}`)
 			.send({
 				cost: 200,
 				sprite: 'sprite.png',
 			});
 
 		expect(response.body).toMatchObject({
-			id: item.id,
+			_id: item._id,
 			cost: 200,
 			sprite: 'sprite.png',
 		});
@@ -92,7 +92,7 @@ describe('III. Update Item', () => {
 describe('IV. Get Updated Item', () => {
 	it('01 GET    - Wrong Item', async () => {
 		const response = await request(`localhost:${process.env.PORT}`).get(
-			`/shopitem/12345`,
+			`/shopitem/123412341234123412341234`,
 		);
 
 		expect(response.statusCode).toBe(404);
@@ -100,7 +100,7 @@ describe('IV. Get Updated Item', () => {
 
 	it('02 GET    - Get Item', async () => {
 		const response = await request(`localhost:${process.env.PORT}`).get(
-			`/shopitem/${item.id}`,
+			`/shopitem/${item._id}`,
 		);
 
 		expect(response.statusCode).toBe(200);
@@ -110,7 +110,7 @@ describe('IV. Get Updated Item', () => {
 describe('V. Delete Item', () => {
 	it('01 DEL    - Delete item', async () => {
 		const response = await request(`localhost:${process.env.PORT}`).delete(
-			`/shopitem/${item.id}`,
+			`/shopitem/${item._id}`,
 		);
 
 		expect(response.statusCode).toBe(200);

@@ -1,28 +1,36 @@
-import { v4 } from 'uuid';
 import redisClient from '@utils/redis';
 import { ShopItem } from '../types/shopItem';
+import ShopItemModel from '@models/ShopItem'
+import { connectToDB } from '@utils/database';
+import { includes } from 'lodash';
 
 const getAllShopItemsInDB = async (): Promise<ShopItem[]> => {
 	try {
+		// Get all stored shop items in DB
+		const db = await connectToDB();
+		const dbShopItem: ShopItem[] = await ShopItemModel.find(
+			{},
+			);
+			
 		await redisClient.connect();
+		// Add new in cache
+		for (let i = 0; i < dbShopItem.length; i++) {
+			await redisClient.HSET(
+				`shopitem:${dbShopItem[i]._id}`,
+				'cost',
+				dbShopItem[i].cost,
+			);
+			await redisClient.HSET(
+				`shopitem:${dbShopItem[i]._id}`,
+				'sprite',
+				dbShopItem[i].sprite,
+			);
+		}
 
-		const matchingKeys = await redisClient.KEYS('shopitem:*');
-
-		const shopItems: ShopItem[] = await Promise.all(
-			matchingKeys.map(async (key) => {
-				const result = await redisClient.HGETALL(key);
-
-				return {
-					id: key,
-					cost: parseInt(result.cost),
-					sprite: result.sprite,
-				};
-			}),
-		);
-
+		await db.disconnect();
 		await redisClient.quit();
 
-		return shopItems;
+		return dbShopItem;
 	} catch (error) {
 		console.error(error);
 		await redisClient.quit();
@@ -32,28 +40,30 @@ const getAllShopItemsInDB = async (): Promise<ShopItem[]> => {
 };
 
 const getShopItemInDB = async (id: string): Promise<ShopItem | null> => {
-	try {
-		const key = id.includes('shopitem:') ? id : `shopitem:${id}`;
-
+	if (id.length != 24) {
+		return null
+	}
+	try {	
+		// Get from cache
 		await redisClient.connect();
-
-		const exists = await redisClient.EXISTS(key);
-
-		if (exists == 0) {
-			await redisClient.quit();
-
-			return null;
+		if ((await redisClient.EXISTS(`shopitem:${id}`)) == 0) {
+			// Try to get it from db
+			redisClient.quit();
+			const db = await connectToDB();
+			const shopItem: ShopItem | null | undefined =
+			await ShopItemModel.findById(id);
+			await db.disconnect();
+			return shopItem ? shopItem : null;
 		}
-
-		const result = await redisClient.HGETALL(key);
-
+		const cacheShopItem = await redisClient.HGETALL(`shopitem:${id}`);
 		await redisClient.quit();
+		const shopItem: ShopItem = {
+			_id: id,
+			cost: parseFloat(cacheShopItem.cost),
+			sprite: cacheShopItem.sprite,
+		}
+		return shopItem ? shopItem : null;
 
-		return {
-			id: key,
-			cost: parseInt(result.cost),
-			sprite: result.sprite,
-		};
 	} catch (error) {
 		console.error(error);
 		await redisClient.quit();
@@ -66,26 +76,23 @@ const createShopItemInDB = async (
 	cost: number,
 	sprite: string,
 ): Promise<ShopItem> => {
-	try {
-		const key = `shopitem:${v4()}`;
+try {
+		const db = await connectToDB();
 
-		await redisClient.connect();
+		const { _id } = await ShopItemModel.create({
+			cost,
+			sprite,
+		});
 
-		await redisClient.HSET(key, 'cost', cost);
-		await redisClient.HSET(key, 'sprite', sprite);
+		const shopItem = await ShopItemModel.findById(_id);
 
-		await redisClient.quit();
+		await db.disconnect();
 
-		return {
-			id: key,
-			cost: cost,
-			sprite: sprite,
-		};
+		return shopItem;
 	} catch (error) {
 		console.error(error);
-		await redisClient.quit();
 
-		throw Error('Unable to create shop item');
+		throw Error(`Unable to create shop item`);
 	}
 };
 
@@ -93,29 +100,24 @@ const updateShopItemInDB = async (
 	id: string,
 	cost: number,
 	sprite: string,
-): Promise<ShopItem> => {
+): Promise<ShopItem | null> => {
 	try {
+		// Delete from cache
 		await redisClient.connect();
+		await redisClient.DEL(`shopitem:${id}`);
+		await redisClient.disconnect();
 
-		const key = id.includes('shopitem:') ? id : `shopitem:${id}`;
+		// Update in DB
+		const db = await connectToDB();
 
-		if (cost) {
-			await redisClient.HSET(key, 'cost', cost);
-		}
+		const shopItem: ShopItem | null | undefined =
+			await ShopItemModel.findByIdAndUpdate(id, { cost, sprite }, {
+				new: true,
+			});
 
-		if (sprite) {
-			await redisClient.HSET(key, 'sprite', sprite);
-		}
+		await db.disconnect();
 
-		const result = await redisClient.HGETALL(key);
-
-		await redisClient.quit();
-
-		return {
-			id: key,
-			cost: parseInt(result.cost),
-			sprite: result.sprite,
-		};
+		return shopItem ? shopItem : null;
 	} catch (error) {
 		console.error(error);
 		await redisClient.quit();
@@ -124,17 +126,17 @@ const updateShopItemInDB = async (
 	}
 };
 
-const deleteShopItemInDB = async (id: string) => {
+const deleteShopItemInDB = async (id: string): Promise<void> => {
 	try {
-		const key = id.includes('shopitem:') ? id : `shopitem:${id}`;
-
+		// Delete from cache
 		await redisClient.connect();
-
-		await redisClient.DEL(key);
-
+		await redisClient.DEL(`shopitem:${id}`);
 		await redisClient.quit();
 
-		return;
+		// Delete from DB
+		const db = await connectToDB();
+		ShopItemModel.findByIdAndDelete(id);
+		await db.disconnect();
 	} catch (error) {
 		console.error(error);
 		await redisClient.quit();

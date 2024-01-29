@@ -44,7 +44,7 @@ const getCharacter = async (req: Request, res: Response) => {
 };
 
 const createCharacter = async (req: Request, res: Response) => {
-	const { sprite, hp, attack, defense } = req.body || {};
+	const { attack, defense, hp, sprite } = req.body || {};
 
 	if (!sprite || !hp || !attack || !defense) {
 		res.status(400).send('Missing field(s) in request body');
@@ -56,13 +56,15 @@ const createCharacter = async (req: Request, res: Response) => {
 		return;
 	}
 
+	const fields: any = {};
+
+	if (attack) fields['attack'] = attack;
+	if (defense) fields['defense'] = defense;
+	if (hp) fields['hp'] = hp;
+	if (sprite) fields['sprite'] = sprite;
+
 	try {
-		const character = await createCharacterInDB(
-			sprite,
-			hp,
-			attack,
-			defense,
-		);
+		const character = await createCharacterInDB(fields);
 
 		res.status(200).send(character);
 		return;
@@ -74,7 +76,7 @@ const createCharacter = async (req: Request, res: Response) => {
 
 const updateCharacter = async (req: Request, res: Response) => {
 	const { id } = req.params;
-	const { sprite, hp, attack, defense } = req.body || {};
+	const { attack, defense, hp, sprite } = req.body || {};
 
 	if (!sprite && !hp && !attack && !defense) {
 		res.status(400).send('Missing field(s) in request body');
@@ -90,15 +92,15 @@ const updateCharacter = async (req: Request, res: Response) => {
 		return;
 	}
 
-	try {
-		const character = await updateCharacterInDB(
-			id,
-			sprite,
-			hp,
-			attack,
-			defense,
-		);
+	const fields: any = {};
 
+	if (attack) fields['attack'] = attack;
+	if (defense) fields['defense'] = defense;
+	if (hp) fields['hp'] = hp;
+	if (sprite) fields['sprite'] = sprite;
+
+	try {
+		const character = await updateCharacterInDB(id, fields);
 		res.status(200).send(character);
 		return;
 	} catch (error) {

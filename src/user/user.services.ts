@@ -18,7 +18,7 @@ const getAllUsersInDB = async (): Promise<User[]> => {
 						const result = await redisClient.HGETALL(character);
 
 						return {
-							id: character,
+							_id: character,
 							sprite: result.sprite,
 							hp: parseInt(result.hp),
 							attack: parseFloat(result.attack),
@@ -73,7 +73,7 @@ const getUserInDB = async (id: string): Promise<User | null> => {
 				const result = await redisClient.HGETALL(character);
 
 				return {
-					id: character,
+					_id: character,
 					sprite: result.sprite,
 					hp: parseInt(result.hp),
 					attack: parseFloat(result.attack),
@@ -298,7 +298,7 @@ const getUserRosterInDB = async (id: string): Promise<Character[] | null> => {
 				const result = await redisClient.HGETALL(character);
 
 				return {
-					id: character,
+					_id: character,
 					sprite: result.sprite,
 					hp: parseInt(result.hp),
 					attack: parseFloat(result.attack),
