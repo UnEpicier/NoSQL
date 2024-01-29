@@ -1,102 +1,39 @@
-import { v4 } from 'uuid';
 import redisClient from '@utils/redis';
 import { Character } from '../types/character';
 import { User, UpdateUser } from '../types/user';
+import { connectToDB } from '@utils/database';
+import UserModel from '@models/User';
 
 const getAllUsersInDB = async (): Promise<User[]> => {
 	try {
-		await redisClient.connect();
 
-		const matchingKeys = await redisClient.KEYS('user:*');
-
-		const usersResult: User[] = await Promise.all(
-			matchingKeys.map(async (key) => {
-				const result = await redisClient.HGETALL(key);
-				const characters: string[] = JSON.parse(result.roster);
-				const populatedCharacters: Character[] = await Promise.all(
-					characters.map(async (character) => {
-						const result = await redisClient.HGETALL(character);
-
-						return {
-							_id: character,
-							sprite: result.sprite,
-							hp: parseInt(result.hp),
-							attack: parseFloat(result.attack),
-							defense: parseFloat(result.defense),
-						};
-					}),
-				);
-
-				return {
-					id: result.id,
-					username: result.username,
-					email: result.email,
-					password: result.password,
-					currency: parseInt(result.currency),
-					rank: parseInt(result.rank),
-					roster: populatedCharacters,
-				};
-			}),
-		);
-
-		await redisClient.quit();
-
-		return usersResult;
+		// Get all stored summon pools in DB
+		const db = await connectToDB();
+		const allUsers: User[] = await UserModel.find(
+			{},
+		).populate('roster');
+		await db.disconnect();
+		return allUsers;
 	} catch (error) {
 		console.error(error);
-		await redisClient.quit();
-
 		throw Error('Unable to get users');
 	}
 };
 
-const getUserInDB = async (id: string): Promise<User | null> => {
+const getUserInDB = async (id: string): Promise<User | null | undefined> => {
 	try {
-		const key = id.includes('user:') ? id : `user:${id}`;
 
-		await redisClient.connect();
+		// Try to get it from db
+		const db = await connectToDB();
 
-		const exists = await redisClient.EXISTS(key);
+		const user: User | null | undefined =
+			await UserModel.findById(id).populate('roster');
 
-		if (exists == 0) {
-			await redisClient.quit();
-
-			return null;
-		}
-
-		const result = await redisClient.HGETALL(key);
-
-		const characters: string[] = JSON.parse(result.roster);
-
-		const populatedCharacters: Character[] = await Promise.all(
-			characters.map(async (character) => {
-				const result = await redisClient.HGETALL(character);
-
-				return {
-					_id: character,
-					sprite: result.sprite,
-					hp: parseInt(result.hp),
-					attack: parseFloat(result.attack),
-					defense: parseFloat(result.defense),
-				};
-			}),
-		);
-
-		await redisClient.quit();
-
-		return {
-			id: result.id,
-			username: result.username,
-			email: result.email,
-			password: result.password,
-			currency: parseInt(result.currency),
-			rank: parseInt(result.rank),
-			roster: populatedCharacters,
-		};
+		await db.disconnect();
+		return user;
+		
 	} catch (error) {
 		console.error(error);
-		await redisClient.quit();
-
 		throw Error(`Unable to get user with id: ${id}`);
 	}
 };
@@ -107,32 +44,26 @@ const createUserInDB = async (
 	password: string,
 ): Promise<User> => {
 	try {
-		const key = `user:${v4()}`;
+		const db = await connectToDB();
 
-		await redisClient.connect();
-
-		await redisClient.HSET(key, 'username', username);
-		await redisClient.HSET(key, 'email', email);
-		await redisClient.HSET(key, 'password', password);
-		await redisClient.HSET(key, 'currency', 10);
-		await redisClient.HSET(key, 'rank', 0);
-		await redisClient.HSET(key, 'roster', '[]');
-
-		await redisClient.quit();
-
-		return {
-			id: key,
-			username: username,
-			email: email,
-			password: password,
+		const { _id } = await UserModel.create({
+			username,
+			email,
+			password,
 			currency: 10,
 			rank: 0,
 			roster: [],
-		};
+		});
+
+		const user = await UserModel.findById(_id).populate(
+			'roster',
+		);
+
+		await db.disconnect();
+
+		return user;
 	} catch (error) {
 		console.error(error);
-		await redisClient.quit();
-
 		throw Error(`Unable to create user`);
 	}
 };
@@ -142,135 +73,65 @@ const updateUserInDB = async (
 	params: UpdateUser,
 ): Promise<User | null> => {
 	try {
-		await redisClient.connect();
+		// Update in DB
+		const db = await connectToDB();
 
-		const key = id.includes('user:') ? id : `user:${id}`;
+		const user: User | null | undefined =
+			await UserModel.findByIdAndUpdate(id, params, {
+				new: true,
+			}).populate('roster');
 
-		if (params.roster) {
-			await redisClient.HSET(
-				key,
-				'roster',
-				JSON.stringify(params.roster),
-			);
+		if (params.roster)
+		{
+			
 		}
 
-		if (params.username) {
-			await redisClient.HSET(key, 'username', params.username);
-		}
+		await db.disconnect();
 
-		if (params.email) {
-			await redisClient.HSET(key, 'email', params.email);
-		}
+		return user ? user : null;
 
-		if (params.password) {
-			await redisClient.HSET(key, 'password', params.password);
-		}
-
-		let result = await getUserInDB(key);
-
-		if (!result) {
-			return result;
-		}
-
-		if (params.currency) {
-			result.currency += params.currency;
-			await redisClient.HSET(key, 'currency', result.currency);
-		}
-
-		if (params.rank) {
-			result.currency += params.rank;
-			await redisClient.HSET(key, 'rank', result.rank);
-		}
-
-		await redisClient.quit();
-
-		return result;
 	} catch (error) {
 		console.error(error);
-		await redisClient.quit();
-
 		throw Error(`Unable to update user with id: ${id}`);
 	}
 };
 
 const deleteUserInDB = async (id: string): Promise<void> => {
 	try {
-		const key = id.includes('user:') ? id : `user:${id}`;
+		// Delete from DB
+		const db = await connectToDB();
+		UserModel.findByIdAndDelete(id);
+		await db.disconnect();
 
-		await redisClient.connect();
-
-		await redisClient.DEL(key);
-
-		await redisClient.quit();
 	} catch (error) {
 		console.error(error);
-		await redisClient.quit();
-
 		throw Error(`Unable to delete user with id: ${id}`);
 	}
 };
 
 const getUserCurrencyInDB = async (id: string): Promise<number | null> => {
 	try {
-		const key = id.includes('user:') ? id : `user:${id}`;
-
-		await redisClient.connect();
-
-		const exists = await redisClient.EXISTS(key);
-
-		if (exists == 0) {
-			await redisClient.quit();
-
-			return null;
-		}
-
-		const result = await redisClient.HGET(key, 'currency');
-
-		await redisClient.quit();
-
-		if (result) {
-			return parseInt(result);
-		}
-		return null;
+		const user = await getUserInDB(id);
+		return user ? user.currency : null;
 	} catch (error) {
 		console.error(error);
-		await redisClient.quit();
-
 		throw Error(`Unable to get user currency with id: ${id}`);
 	}
 };
 
 const getUserRankInDB = async (id: string): Promise<number | null> => {
 	try {
-		const key = id.includes('user:') ? id : `user:${id}`;
-
-		await redisClient.connect();
-
-		const exists = await redisClient.EXISTS(key);
-
-		if (exists == 0) {
-			await redisClient.quit();
-
-			return null;
-		}
-
-		const result = await redisClient.HGET(key, 'rank');
-
-		await redisClient.quit();
-
-		if (result) {
-			return parseInt(result);
-		}
-		return null;
+		const user = await getUserInDB(id);
+		return user ? user.rank : null;
 	} catch (error) {
 		console.error(error);
-		await redisClient.quit();
-
 		throw Error(`Unable to get user currency with id: ${id}`);
 	}
 };
 
-const getUserRosterInDB = async (id: string): Promise<Character[] | null> => {
+
+
+const getUserRosterInDB = async (id: string): Promise<Character[] | null | undefined> => {
 	try {
 		const key = id.includes('user:') ? id : `user:${id}`;
 
@@ -279,16 +140,19 @@ const getUserRosterInDB = async (id: string): Promise<Character[] | null> => {
 		const exists = await redisClient.EXISTS(key);
 
 		if (exists == 0) {
+			const user = await getUserInDB(id);
+			await redisClient.HSET(key, 'roster', JSON.stringify(user?.roster));
 			await redisClient.quit();
-
-			return null;
+			return user?.roster;
 		}
 
 		const result = await redisClient.HGET(key, 'roster');
 
 		if (!result) {
+			const user = await getUserInDB(id);
+			await redisClient.HSET(key, 'roster', JSON.stringify(user?.roster));
 			await redisClient.quit();
-			return null;
+			return user?.roster;
 		}
 
 		const characters: string[] = JSON.parse(result);
@@ -316,6 +180,7 @@ const getUserRosterInDB = async (id: string): Promise<Character[] | null> => {
 		throw Error(`Unable to get user currency with id: ${id}`);
 	}
 };
+
 
 export {
 	createUserInDB,
