@@ -8,6 +8,7 @@ dotenv.config();
 import shopItem from '@shopitem/shopitem.routes';
 import character from '@character/character.routes';
 import summonpool from '@summonpool/summonpool.routes';
+import user from '@user/user.routes';
 
 // ----------------------------------------------------- Server --------------------------------------------------------
 const app = express();
@@ -24,6 +25,7 @@ app.use(
 app.use(shopItem);
 app.use(character);
 app.use(summonpool);
+app.use(user);
 
 app.listen(process.env.PORT, () => {
 	console.log(`Server is running on port ${process.env.PORT}`);

@@ -5,7 +5,17 @@ export interface User {
 	username: string;
 	email: string;
 	password: string;
-  currency: number;
+  	currency: number;
 	rank: number;
 	roster: Character[];
+}
+
+
+export interface UpdateUser {
+	username?: string;
+	email?: string;
+	password?: string;
+  	currency?: number;
+	rank?: number;
+	roster?: Character[];
 }

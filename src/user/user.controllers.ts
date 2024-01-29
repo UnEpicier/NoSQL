@@ -3,17 +3,14 @@ import {
 	createUserInDB,
 	getAllUsersInDB,
 	getUserInDB,
-  getUserCurrencyInDB,
-  getUserRankInDB,
-  getUserRosterInDB,
+	getUserCurrencyInDB,
+	getUserRankInDB,
+	getUserRosterInDB,
 	updateUserInDB,
-	updateUserCurrencyInDB,
-	updateUserRankInDB,
-	updateUserRosterInDB,
 	deleteUserInDB,
 } from './user.services';
 
-const getAllUsers = async (req: Request, res: Response) => {
+const getAllUsers = async (_: Request, res: Response) => {
 	try {
 		const users = await getAllUsersInDB();
 
@@ -114,16 +111,17 @@ const createUser = async (req: Request, res: Response) => {
 		return;
 	}
 
-	if (!(username instanceof String) || !(email instanceof String) || !(password instanceof String)) {
+	if (
+		typeof username != 'string' ||
+		typeof email != 'string' ||
+		typeof password != 'string'
+	) {
 		res.status(422).send('Wrong field(s) type in request body');
+		return;
 	}
 
 	try {
-		const user = await createUserInDB(
-			username,
-			email,
-			password,
-		);
+		const user = await createUserInDB(username, email, password);
 
 		res.status(200).send(user);
 		return;
@@ -142,19 +140,25 @@ const updateUser = async (req: Request, res: Response) => {
 		return;
 	}
 
-	if (!(username instanceof String) || !(email instanceof String) || !(password instanceof String)) {
+	if (
+		typeof username !== 'string' ||
+		typeof email !== 'string' ||
+		typeof password !== 'string'
+	) {
 		res.status(422).send('Wrong field(s) type in request body');
 		return;
 	}
 
 	try {
-		const user = await updateUserInDB(
-			id,
+		const user = await updateUserInDB(id, {
 			username,
 			email,
 			password,
-		);
-
+		});
+		if (!user) {
+			res.status(404).send(user);
+			return;
+		}
 		res.status(200).send(user);
 		return;
 	} catch (error) {
@@ -178,12 +182,16 @@ const updateUserCurrency = async (req: Request, res: Response) => {
 	}
 
 	try {
-		const userCurrency = await updateUserCurrencyInDB(
-			id,
-			amount,
-		);
+		const user = await updateUserInDB(id, {
+			currency: amount,
+		});
 
-		res.status(200).send(userCurrency);
+		if (!user) {
+			res.status(404).send(user);
+			return;
+		}
+
+		res.status(200).send(user.currency);
 		return;
 	} catch (error) {
 		res.status(500).send(error);
@@ -206,12 +214,16 @@ const updateUserRank = async (req: Request, res: Response) => {
 	}
 
 	try {
-		const userRank = await updateUserRankInDB(
-			id,
-			amount,
-		);
+		const user = await updateUserInDB(id, {
+			rank: amount,
+		});
 
-		res.status(200).send(userRank);
+		if (!user) {
+			res.status(404).send(user);
+			return;
+		}
+
+		res.status(200).send(user.rank);
 		return;
 	} catch (error) {
 		res.status(500).send(error);
@@ -234,12 +246,16 @@ const updateUserRoster = async (req: Request, res: Response) => {
 	}
 
 	try {
-		const userRank = await updateUserRosterInDB(
-			id,
-			characters,
-		);
+		const user = await updateUserInDB(id, {
+			roster: characters,
+		});
 
-		res.status(200).send(userRank);
+		if (!user) {
+			res.status(404).send(user);
+			return;
+		}
+
+		res.status(200).send(JSON.stringify(user.roster));
 		return;
 	} catch (error) {
 		res.status(500).send(error);
@@ -270,6 +286,6 @@ export {
 	updateUser,
 	updateUserCurrency,
 	updateUserRank,
-  updateUserRoster,
+	updateUserRoster,
 	deleteUser,
 };
