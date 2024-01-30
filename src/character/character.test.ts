@@ -29,7 +29,7 @@ describe('I. Create character', () => {
 			});
 
 		character = response.body;
-		
+
 		expect(response.statusCode).toBe(200);
 	});
 });
@@ -71,13 +71,6 @@ describe('III. Update Character', () => {
 			.send({
 				hp: 200,
 			});
-			
-			it('03 PATCH  - Update hp', async () => {
-				const response = await request(`localhost:${process.env.PORT}`)
-				.patch(`/character/${character._id}`)
-				.send({
-					hp: 200,
-				});
 
 		expect(response.body.hp).toBe(200);
 	});

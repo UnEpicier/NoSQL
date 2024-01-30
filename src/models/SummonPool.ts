@@ -2,17 +2,13 @@ import { Schema, model, models } from 'mongoose';
 
 const SummonPoolSchema = new Schema(
 	{
-		characters: {
-			type: [
-				{
-					type: Schema.ObjectId,
-					ref: 'Character',
-					unique: true,
-				},
-			],
-			required: true,
-			default: [],
-		},
+		characters: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: 'Character',
+				unique: true,
+			},
+		],
 		cost: {
 			type: Number,
 			required: true,

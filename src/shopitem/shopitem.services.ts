@@ -1,30 +1,19 @@
 import redisClient from '@utils/redis';
 import { ShopItem } from '../types/shopItem';
-import ShopItemModel from '@models/ShopItem'
+import ShopItemModel from '@models/ShopItem';
 import { connectToDB } from '@utils/database';
-import { includes } from 'lodash';
 
 const getAllShopItemsInDB = async (): Promise<ShopItem[]> => {
 	try {
 		// Get all stored shop items in DB
 		const db = await connectToDB();
-		const dbShopItem: ShopItem[] = await ShopItemModel.find(
-			{},
-			);
-			
+		const dbShopItem: ShopItem[] = await ShopItemModel.find({});
+
 		await redisClient.connect();
 		// Add new in cache
 		for (let i = 0; i < dbShopItem.length; i++) {
-			await redisClient.HSET(
-				`shopitem:${dbShopItem[i]._id}`,
-				'cost',
-				dbShopItem[i].cost,
-			);
-			await redisClient.HSET(
-				`shopitem:${dbShopItem[i]._id}`,
-				'sprite',
-				dbShopItem[i].sprite,
-			);
+			await redisClient.HSET(`shopitem:${dbShopItem[i]._id}`, 'cost', dbShopItem[i].cost);
+			await redisClient.HSET(`shopitem:${dbShopItem[i]._id}`, 'sprite', dbShopItem[i].sprite);
 		}
 
 		await db.disconnect();
@@ -41,17 +30,16 @@ const getAllShopItemsInDB = async (): Promise<ShopItem[]> => {
 
 const getShopItemInDB = async (id: string): Promise<ShopItem | null> => {
 	if (id.length != 24) {
-		return null
+		return null;
 	}
-	try {	
+	try {
 		// Get from cache
 		await redisClient.connect();
 		if ((await redisClient.EXISTS(`shopitem:${id}`)) == 0) {
 			// Try to get it from db
 			redisClient.quit();
 			const db = await connectToDB();
-			const shopItem: ShopItem | null | undefined =
-			await ShopItemModel.findById(id);
+			const shopItem: ShopItem | null | undefined = await ShopItemModel.findById(id);
 			await db.disconnect();
 			return shopItem ? shopItem : null;
 		}
@@ -61,9 +49,8 @@ const getShopItemInDB = async (id: string): Promise<ShopItem | null> => {
 			_id: id,
 			cost: parseFloat(cacheShopItem.cost),
 			sprite: cacheShopItem.sprite,
-		}
+		};
 		return shopItem ? shopItem : null;
-
 	} catch (error) {
 		console.error(error);
 		await redisClient.quit();
@@ -72,11 +59,8 @@ const getShopItemInDB = async (id: string): Promise<ShopItem | null> => {
 	}
 };
 
-const createShopItemInDB = async (
-	cost: number,
-	sprite: string,
-): Promise<ShopItem> => {
-try {
+const createShopItemInDB = async (cost: number, sprite: string): Promise<ShopItem> => {
+	try {
 		const db = await connectToDB();
 
 		const { _id } = await ShopItemModel.create({
@@ -96,11 +80,7 @@ try {
 	}
 };
 
-const updateShopItemInDB = async (
-	id: string,
-	cost: number,
-	sprite: string,
-): Promise<ShopItem | null> => {
+const updateShopItemInDB = async (id: string, cost: number, sprite: string): Promise<ShopItem | null> => {
 	try {
 		// Delete from cache
 		await redisClient.connect();
@@ -110,10 +90,13 @@ const updateShopItemInDB = async (
 		// Update in DB
 		const db = await connectToDB();
 
-		const shopItem: ShopItem | null | undefined =
-			await ShopItemModel.findByIdAndUpdate(id, { cost, sprite }, {
+		const shopItem: ShopItem | null | undefined = await ShopItemModel.findByIdAndUpdate(
+			id,
+			{ cost, sprite },
+			{
 				new: true,
-			});
+			},
+		);
 
 		await db.disconnect();
 
@@ -145,10 +128,4 @@ const deleteShopItemInDB = async (id: string): Promise<void> => {
 	}
 };
 
-export {
-	createShopItemInDB,
-	deleteShopItemInDB,
-	getAllShopItemsInDB,
-	getShopItemInDB,
-	updateShopItemInDB,
-};
+export { createShopItemInDB, deleteShopItemInDB, getAllShopItemsInDB, getShopItemInDB, updateShopItemInDB };

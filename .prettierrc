@@ -7,5 +7,6 @@
 	"semi": true,
 	"trailingComma": "all",
 	"singleAttributePerLine": true,
-	"singleQuote": true
+	"singleQuote": true,
+	"printWidth": 500
 }
