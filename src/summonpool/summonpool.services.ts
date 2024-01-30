@@ -40,8 +40,6 @@ const getAllSummonPoolsInDB = async (): Promise<SummonPool[]> => {
 		await db.disconnect();
 		await redisClient.quit();
 
-		console.log(dbSummonPools);
-
 		return dbSummonPools;
 	} catch (error) {
 		console.error(error);
@@ -165,3 +163,4 @@ const deleteSummonPoolInDB = async (id: string): Promise<void> => {
 };
 
 export { getAllSummonPoolsInDB, createSummonPoolInDB, getSummonPoolInDB, updateSummonPoolInDB, deleteSummonPoolInDB };
+
