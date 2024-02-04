@@ -57,7 +57,7 @@ const getUserCurrency = async (req: Request, res: Response) => {
 			return;
 		}
 
-		res.status(200).send(userCurrency);
+		res.status(200).send({ currency: userCurrency });
 		return;
 	} catch (error) {
 		res.status(500).send(error);
@@ -76,7 +76,7 @@ const getUserRank = async (req: Request, res: Response) => {
 			return;
 		}
 
-		res.status(200).send(userRank);
+		res.status(200).send({ rank: userRank });
 		return;
 	} catch (error) {
 		res.status(500).send(error);
@@ -176,7 +176,7 @@ const updateUserCurrency = async (req: Request, res: Response) => {
 		return;
 	}
 
-	if (!parseInt(currency)) {
+	if (typeof currency != 'number') {
 		res.status(422).send('Wrong field(s) type in request body');
 		return;
 	}
@@ -191,7 +191,7 @@ const updateUserCurrency = async (req: Request, res: Response) => {
 			return;
 		}
 
-		res.status(200).send(user.currency);
+		res.status(200).send({ currency: user.currency });
 		return;
 	} catch (error) {
 		res.status(500).send(error);
@@ -208,7 +208,7 @@ const updateUserRank = async (req: Request, res: Response) => {
 		return;
 	}
 
-	if (!parseInt(rank)) {
+	if (typeof rank != 'number') {
 		res.status(422).send('Wrong field(s) type in request body');
 		return;
 	}
@@ -223,7 +223,7 @@ const updateUserRank = async (req: Request, res: Response) => {
 			return;
 		}
 
-		res.status(200).send(user.rank);
+		res.status(200).send({ rank: user.rank });
 		return;
 	} catch (error) {
 		res.status(500).send(error);
