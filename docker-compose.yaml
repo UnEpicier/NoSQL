@@ -23,5 +23,17 @@ services:
     volumes:
       - ./mongo-init.sh:/docker-entrypoint-initdb.d/init.sh
       - dbdata:/data/db
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - "8002:8002"
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=admin
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_MONGODB_AUTH_USERNAME=user
+      - ME_CONFIG_MONGODB_AUTH_PASSWORD=secret
+    depends_on:
+      - mongo
 volumes:
   dbdata:
