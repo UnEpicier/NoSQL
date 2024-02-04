@@ -10,12 +10,12 @@ import {
 const router = Router();
 
 router.get('/shopitems', getAllShopItems);
-router.get('/shopitem/:id', getShopItem);
+router.get('/shopitems/:id', getShopItem);
 
-router.post('/shopitem', createShopItem);
+router.post('/shopitems', createShopItem);
 
-router.patch('/shopitem/:id', updateShopItem);
+router.patch('/shopitems/:id', updateShopItem);
 
-router.delete('/shopitem/:id', deleteShopItem);
+router.delete('/shopitems/:id', deleteShopItem);
 
 export default router;

@@ -1,0 +1,1316 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "NoSQL API",
+    "description": "Rest API for a gatcha type game.",
+    "version": "1.0.11"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "tags": [
+    {
+      "name": "character",
+      "description": "Used for combats, has to be summoned."
+    },
+    {
+      "name": "summonPool",
+      "description": "Pool of characters for summon."
+    },
+    {
+      "name": "shopItem",
+      "description": "Can be bought by the player."
+    },
+    {
+      "name": "user",
+      "description": "Stores all infos about the player."
+    }
+  ],
+  "paths": {
+    "/characters": {
+      "get": {
+        "tags": [
+          "character"
+        ],
+        "summary": "Get all characters",
+        "operationId": "getAllCharacters",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Character"
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No content"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "character"
+        ],
+        "summary": "Add a new character",
+        "operationId": "createCharacter",
+        "requestBody": {
+          "description": "Create a new character",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCharacter"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Character"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing fields in request body"
+          },
+          "422": {
+            "description": "Wrong fields type in request body"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/characters/{id}": {
+      "get": {
+        "tags": [
+          "character"
+        ],
+        "summary": "Get a character's infos from their id",
+        "operationId": "getCharacter",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "UUID of the character",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Character"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Character not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "character"
+        ],
+        "summary": "Update a character",
+        "operationId": "updateCharacter",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "UUID of the character",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Update a character",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCharacter"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Character"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing fields in request body"
+          },
+          "422": {
+            "description": "Wrong fields type in request body"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "character"
+        ],
+        "summary": "Delete a character",
+        "operationId": "deleteCharacter",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "UUID of the character",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/shopitems": {
+      "get": {
+        "tags": [
+          "shopItem"
+        ],
+        "summary": "Get all shop items",
+        "operationId": "getAllShopItems",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ShopItem"
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No content"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "shopItem"
+        ],
+        "summary": "Add a new shop item",
+        "operationId": "createShopItem",
+        "requestBody": {
+          "description": "Create a new shop item",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateShopItem"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShopItem"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing fields in request body"
+          },
+          "422": {
+            "description": "Wrong fields type in request body"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/shopitems/{id}": {
+      "get": {
+        "tags": [
+          "shopItem"
+        ],
+        "summary": "Get a shop item's infos from its id",
+        "operationId": "getShopItem",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "UUID of the shop item",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShopItem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "ShopItem not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "shopItem"
+        ],
+        "summary": "Update a shop item",
+        "operationId": "updateShopItem",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "UUID of the shop item",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Update a shop item",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateShopItem"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShopItem"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing fields in request body"
+          },
+          "422": {
+            "description": "Wrong fields type in request body"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "shopItem"
+        ],
+        "summary": "Delete a shop item",
+        "operationId": "deleteShopItem",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "UUID of the shop item",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/summonpools": {
+      "get": {
+        "tags": [
+          "summonPool"
+        ],
+        "summary": "Get all summon pools",
+        "operationId": "getAllSummonPools",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SummonPool"
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No content"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "summonPool"
+        ],
+        "summary": "Add a new summon pool",
+        "operationId": "createSummonPool",
+        "requestBody": {
+          "description": "Create a new summon pool",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSummonPool"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SummonPool"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing fields in request body"
+          },
+          "422": {
+            "description": "Wrong fields type in request body"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/summonpools/{id}": {
+      "get": {
+        "tags": [
+          "summonPool"
+        ],
+        "summary": "Get a summon pool's infos from its id",
+        "operationId": "getSummonPool",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "UUID of the summon pool",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SummonPool"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "SummonPool not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "summonPool"
+        ],
+        "summary": "Update a summon pool",
+        "operationId": "updateSummonPool",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "UUID of the summon pool",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Update a summon pool",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSummonPool"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SummonPool"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing fields in request body"
+          },
+          "422": {
+            "description": "Wrong fields type in request body"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "summonPool"
+        ],
+        "summary": "Delete a summon pool",
+        "operationId": "deleteSummonPool",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "UUID of the summon pool",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Get all users",
+        "operationId": "getAllUsers",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No content"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Add a new user",
+        "operationId": "createUser",
+        "requestBody": {
+          "description": "Create a new user",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUser"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing fields in request body"
+          },
+          "422": {
+            "description": "Wrong fields type in request body"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Get a user's infos from their id",
+        "operationId": "getUser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "UUID of the user",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Update a user",
+        "operationId": "updateUser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "UUID of the user",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Update a user",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUser"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing fields in request body"
+          },
+          "422": {
+            "description": "Wrong fields type in request body"
+          },
+          "500": {
+            "description": "Server error*"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Delete a user",
+        "operationId": "deleteUser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "UUID of the user",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/users/{id}/currency": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Get user's currency from their id",
+        "operationId": "getUserCurrency",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "UUID of the user",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Update a user's currency",
+        "operationId": "updateUser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "UUID of the user",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Update a user's currency",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCurrency"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing fields in request body"
+          },
+          "422": {
+            "description": "Wrong fields type in request body"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/users/{id}/rank": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Get user's rank from their id",
+        "operationId": "getUserRank",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "UUID of the user",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Update a user's rank",
+        "operationId": "updateUser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "UUID of the user",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Update a user's rank",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRank"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing fields in request body"
+          },
+          "422": {
+            "description": "Wrong fields type in request body"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/users/{id}/roster": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Get user's roster from their id",
+        "operationId": "getUserRoster",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "UUID of the user",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateRoster"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Update a user's roster",
+        "operationId": "updateUser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "UUID of the user",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Update a user's roster",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoster"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateRoster"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing fields in request body"
+          },
+          "422": {
+            "description": "Wrong fields type in request body"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Character": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "f81d4fae-7dec-11d0-a765-00a0c91e6bf6"
+          },
+          "name": {
+            "type": "string",
+            "example": "René"
+          },
+          "sprite": {
+            "type": "string",
+            "example": "rene.png"
+          },
+          "hp": {
+            "type": "integer",
+            "format": "int64",
+            "example": 1200
+          },
+          "attack": {
+            "type": "integer",
+            "format": "int64",
+            "example": 150
+          },
+          "defense": {
+            "type": "integer",
+            "format": "int64",
+            "example": 150
+          }
+        },
+        "xml": {
+          "name": "character"
+        }
+      },
+      "UpdateCharacter": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "René"
+          },
+          "sprite": {
+            "type": "string",
+            "example": "rene.png"
+          },
+          "hp": {
+            "type": "integer",
+            "format": "int64",
+            "example": 1200
+          },
+          "attack": {
+            "type": "integer",
+            "format": "int64",
+            "example": 150
+          },
+          "defense": {
+            "type": "integer",
+            "format": "int64",
+            "example": 150
+          }
+        },
+        "xml": {
+          "name": "updateCharacter"
+        }
+      },
+      "ShopItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "f81d4fae-7dec-11d0-a765-00a0c91e6bf6"
+          },
+          "sprite": {
+            "type": "string",
+            "example": "boostXP.png"
+          },
+          "cost": {
+            "type": "integer",
+            "format": "int64",
+            "example": 500
+          }
+        },
+        "xml": {
+          "name": "shopItem"
+        }
+      },
+      "UpdateShopItem": {
+        "type": "object",
+        "properties": {
+          "sprite": {
+            "type": "string",
+            "example": "boostXP.png"
+          },
+          "cost": {
+            "type": "integer",
+            "format": "int64",
+            "example": 500
+          }
+        },
+        "xml": {
+          "name": "updateShopItem"
+        }
+      },
+      "SummonPool": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "f81d4fae-7dec-11d0-a765-00a0c91e6bf6"
+          },
+          "characters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Character"
+            }
+          },
+          "cost": {
+            "type": "integer",
+            "format": "int64",
+            "example": 75
+          },
+          "duration": {
+            "type": "integer",
+            "format": "int64",
+            "example": 6
+          }
+        },
+        "xml": {
+          "name": "summonPool"
+        }
+      },
+      "UpdateSummonPool": {
+        "type": "object",
+        "properties": {
+          "characters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Character"
+            }
+          },
+          "cost": {
+            "type": "integer",
+            "format": "int64",
+            "example": 75
+          },
+          "duration": {
+            "type": "integer",
+            "format": "int64",
+            "example": 6
+          }
+        },
+        "xml": {
+          "name": "updateSummonPool"
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "f81d4fae-7dec-11d0-a765-00a0c91e6bf6"
+          },
+          "username": {
+            "type": "string",
+            "example": "theUser"
+          },
+          "email": {
+            "type": "string",
+            "example": "user@email.com"
+          },
+          "currency": {
+            "type": "number",
+            "example": 1040
+          },
+          "rank": {
+            "type": "number",
+            "example": 2302
+          },
+          "roster": {
+            "type": "array",
+            "description": "User's selected team of characters",
+            "items": {
+              "$ref": "#/components/schemas/Character"
+            }
+          }
+        },
+        "xml": {
+          "name": "user"
+        }
+      },
+      "UpdateUser": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "theUser"
+          },
+          "email": {
+            "type": "string",
+            "example": "user@email.com"
+          },
+          "currency": {
+            "type": "number",
+            "example": 1040
+          },
+          "rank": {
+            "type": "number",
+            "example": 2302
+          },
+          "roster": {
+            "type": "array",
+            "description": "User's selected team of characters",
+            "items": {
+              "$ref": "#/components/schemas/Character"
+            }
+          }
+        },
+        "xml": {
+          "name": "updateUser"
+        }
+      },
+      "UpdateCurrency": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "number",
+            "example": 1040
+          }
+        },
+        "xml": {
+          "name": "updateCurrency"
+        }
+      },
+      "UpdateRank": {
+        "type": "object",
+        "properties": {
+          "rank": {
+            "type": "number",
+            "example": 2302
+          }
+        },
+        "xml": {
+          "name": "updateRank"
+        }
+      },
+      "UpdateRoster": {
+        "type": "object",
+        "properties": {
+          "roster": {
+            "type": "array",
+            "description": "User's selected team of characters",
+            "items": {
+              "$ref": "#/components/schemas/Character"
+            }
+          }
+        },
+        "xml": {
+          "name": "updateRoster"
+        }
+      }
+    }
+  }
+}

@@ -4,6 +4,9 @@ import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import redisClient from '@utils/redis';
 import * as dotenv from 'dotenv';
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from '../swagger.json';
+
 dotenv.config();
 
 import shopItem from '@shopitem/shopitem.routes';
@@ -27,6 +30,8 @@ app.use(shopItem);
 app.use(character);
 app.use(summonpool);
 app.use(user);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.listen(process.env.PORT, () => {
 	console.log(`Server is running on port ${process.env.PORT}`);

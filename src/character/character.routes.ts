@@ -10,12 +10,12 @@ import {
 const router = Router();
 
 router.get('/characters', getAllCharacters);
-router.get('/character/:id', getCharacter);
+router.get('/characters/:id', getCharacter);
 
-router.post('/character', createCharacter);
+router.post('/characters', createCharacter);
 
-router.patch('/character/:id', updateCharacter);
+router.patch('/characters/:id', updateCharacter);
 
-router.delete('/character/:id', deleteCharacter);
+router.delete('/characters/:id', deleteCharacter);
 
 export default router;

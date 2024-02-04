@@ -10,12 +10,12 @@ import {
 const router = Router();
 
 router.get('/summonpools', getAllSummonPools);
-router.get('/summonpool/:id', getSummonPool);
+router.get('/summonpools/:id', getSummonPool);
 
-router.post('/summonpool', createSummonPool);
+router.post('/summonpools', createSummonPool);
 
-router.patch('/summonpool/:id', updateSummonPool);
+router.patch('/summonpools/:id', updateSummonPool);
 
-router.delete('/summonpool/:id', deleteSummonPool);
+router.delete('/summonpools/:id', deleteSummonPool);
 
 export default router;
