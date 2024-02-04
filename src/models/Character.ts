@@ -2,6 +2,10 @@ import { Schema, model, models } from 'mongoose';
 
 const CharacterSchema = new Schema(
 	{
+		name: {
+			type: String,
+			required: true,
+		},
 		attack: {
 			type: Number,
 			required: true,

@@ -75,17 +75,16 @@ const updateUserInDB = async (
 	try {
 		// Update in DB
 		const db = await connectToDB();
-
 		const user: User | null | undefined =
-			await UserModel.findByIdAndUpdate(id, params, {
-				new: true,
-			}).populate('roster');
-
+		await UserModel.findByIdAndUpdate(id, params, {
+			new: true,
+		}).populate('roster');
+		
 		if (params.roster)
 		{
 			
 		}
-
+		
 		await db.disconnect();
 
 		return user ? user : null;
@@ -163,6 +162,7 @@ const getUserRosterInDB = async (id: string): Promise<Character[] | null | undef
 
 				return {
 					_id: character,
+					name: result.name,
 					sprite: result.sprite,
 					hp: parseInt(result.hp),
 					attack: parseFloat(result.attack),

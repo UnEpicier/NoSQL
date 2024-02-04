@@ -44,9 +44,9 @@ const getCharacter = async (req: Request, res: Response) => {
 };
 
 const createCharacter = async (req: Request, res: Response) => {
-	const { attack, defense, hp, sprite } = req.body || {};
+	const { name, attack, defense, hp, sprite } = req.body || {};
 
-	if (!sprite || !hp || !attack || !defense) {
+	if (!name || !sprite || !hp || !attack || !defense) {
 		res.status(400).send('Missing field(s) in request body');
 		return;
 	}
@@ -58,6 +58,7 @@ const createCharacter = async (req: Request, res: Response) => {
 
 	const fields: any = {};
 
+	if (name) fields['name'] = name;
 	if (attack) fields['attack'] = attack;
 	if (defense) fields['defense'] = defense;
 	if (hp) fields['hp'] = hp;
@@ -76,9 +77,9 @@ const createCharacter = async (req: Request, res: Response) => {
 
 const updateCharacter = async (req: Request, res: Response) => {
 	const { id } = req.params;
-	const { attack, defense, hp, sprite } = req.body || {};
+	const { name, attack, defense, hp, sprite } = req.body || {};
 
-	if (!sprite && !hp && !attack && !defense) {
+	if (!name && !sprite && !hp && !attack && !defense) {
 		res.status(400).send('Missing field(s) in request body');
 		return;
 	}
@@ -94,6 +95,7 @@ const updateCharacter = async (req: Request, res: Response) => {
 
 	const fields: any = {};
 
+	if (name) fields['name'] = name;
 	if (attack) fields['attack'] = attack;
 	if (defense) fields['defense'] = defense;
 	if (hp) fields['hp'] = hp;

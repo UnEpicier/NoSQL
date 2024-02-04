@@ -10,6 +10,7 @@ import { isEqual } from 'lodash';
 
 // ------------------------------------------------------ Types --------------------------------------------------------
 import { SummonPool } from '../types/summonpool';
+import { Character } from '../types/character';
 // ---------------------------------------------------------------------------------------------------------------------
 
 const getAllSummonPoolsInDB = async (): Promise<SummonPool[]> => {
@@ -91,7 +92,7 @@ const getSummonPoolInDB = async (id: string): Promise<SummonPool | null> => {
 	}
 };
 
-const createSummonPoolInDB = async (characters: string[], cost: number, duration: number): Promise<SummonPool> => {
+const createSummonPoolInDB = async (characters: Character[], cost: number, duration: number): Promise<SummonPool> => {
 	try {
 		const db = await connectToDB();
 

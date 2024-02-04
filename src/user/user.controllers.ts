@@ -141,9 +141,9 @@ const updateUser = async (req: Request, res: Response) => {
 	}
 
 	if (
-		typeof username !== 'string' ||
-		typeof email !== 'string' ||
-		typeof password !== 'string'
+		(username && typeof username !== 'string') ||
+		(email && typeof email !== 'string') ||
+		(password && typeof password !== 'string')
 	) {
 		res.status(422).send('Wrong field(s) type in request body');
 		return;
@@ -169,21 +169,21 @@ const updateUser = async (req: Request, res: Response) => {
 
 const updateUserCurrency = async (req: Request, res: Response) => {
 	const { id } = req.params;
-	const { amount } = req.body || {};
+	const { currency } = req.body || {};
 
-	if (!amount) {
+	if (!currency) {
 		res.status(400).send('Missing field(s) in request body');
 		return;
 	}
 
-	if (!parseInt(amount)) {
+	if (!parseInt(currency)) {
 		res.status(422).send('Wrong field(s) type in request body');
 		return;
 	}
 
 	try {
 		const user = await updateUserInDB(id, {
-			currency: amount,
+			currency,
 		});
 
 		if (!user) {
@@ -201,21 +201,21 @@ const updateUserCurrency = async (req: Request, res: Response) => {
 
 const updateUserRank = async (req: Request, res: Response) => {
 	const { id } = req.params;
-	const { amount } = req.body || {};
+	const { rank } = req.body || {};
 
-	if (!amount) {
+	if (!rank) {
 		res.status(400).send('Missing field(s) in request body');
 		return;
 	}
 
-	if (!parseInt(amount)) {
+	if (!parseInt(rank)) {
 		res.status(422).send('Wrong field(s) type in request body');
 		return;
 	}
 
 	try {
 		const user = await updateUserInDB(id, {
-			rank: amount,
+			rank,
 		});
 
 		if (!user) {

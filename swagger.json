@@ -112,8 +112,7 @@
             "description": "UUID of the character",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -149,8 +148,7 @@
             "description": "UUID of the character",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -200,8 +198,7 @@
             "description": "UUID of the character",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -298,8 +295,7 @@
             "description": "UUID of the shop item",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -335,8 +331,7 @@
             "description": "UUID of the shop item",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -386,8 +381,7 @@
             "description": "UUID of the shop item",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -484,8 +478,7 @@
             "description": "UUID of the summon pool",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -521,8 +514,7 @@
             "description": "UUID of the summon pool",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -572,8 +564,7 @@
             "description": "UUID of the summon pool",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -627,7 +618,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateUser"
+                "$ref": "#/components/schemas/CreateUser"
               }
             }
           },
@@ -670,8 +661,7 @@
             "description": "UUID of the user",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -707,8 +697,7 @@
             "description": "UUID of the user",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -758,8 +747,7 @@
             "description": "UUID of the user",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -787,8 +775,7 @@
             "description": "UUID of the user",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -824,8 +811,7 @@
             "description": "UUID of the user",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -877,8 +863,7 @@
             "description": "UUID of the user",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -914,8 +899,7 @@
             "description": "UUID of the user",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -967,8 +951,7 @@
             "description": "UUID of the user",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -1004,8 +987,7 @@
             "description": "UUID of the user",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -1051,8 +1033,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid",
-            "example": "f81d4fae-7dec-11d0-a765-00a0c91e6bf6"
+            "example": "65bfb1bcbe428a7b53700406"
           },
           "name": {
             "type": "string",
@@ -1118,8 +1099,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid",
-            "example": "f81d4fae-7dec-11d0-a765-00a0c91e6bf6"
+            "example": "65bfb1bcbe428a7b53700406"
           },
           "sprite": {
             "type": "string",
@@ -1157,8 +1137,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid",
-            "example": "f81d4fae-7dec-11d0-a765-00a0c91e6bf6"
+            "example": "65bfb1bcbe428a7b53700406"
           },
           "characters": {
             "type": "array",
@@ -1210,12 +1189,15 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid",
-            "example": "f81d4fae-7dec-11d0-a765-00a0c91e6bf6"
+            "example": "65bfb1bcbe428a7b53700406"
           },
           "username": {
             "type": "string",
             "example": "theUser"
+          },
+          "password": {
+            "type": "string",
+            "example": "123"
           },
           "email": {
             "type": "string",
@@ -1248,6 +1230,10 @@
             "type": "string",
             "example": "theUser"
           },
+          "password": {
+            "type": "string",
+            "example": "123"
+          },
           "email": {
             "type": "string",
             "example": "user@email.com"
@@ -1266,6 +1252,26 @@
             "items": {
               "$ref": "#/components/schemas/Character"
             }
+          }
+        },
+        "xml": {
+          "name": "updateUser"
+        }
+      },
+      "CreateUser": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "theUser"
+          },
+          "password": {
+            "type": "string",
+            "example": "123"
+          },
+          "email": {
+            "type": "string",
+            "example": "user@email.com"
           }
         },
         "xml": {

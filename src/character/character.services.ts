@@ -17,6 +17,11 @@ const getAllCharactersInDB = async (): Promise<Character[]> => {
 		for (let i = 0; i < dbCharacter.length; i++) {
 			await redisClient.HSET(
 				`character:${dbCharacter[i]._id}`,
+				'name',
+				dbCharacter[i].name,
+			);
+			await redisClient.HSET(
+				`character:${dbCharacter[i]._id}`,
 				'attack',
 				dbCharacter[i].attack,
 			);
@@ -69,6 +74,7 @@ const getCharacterInDB = async (id: string): Promise<Character | null> => {
 		await redisClient.quit();
 		const character: Character = {
 			_id: id,
+			name: cacheCharacter.name,
 			attack: parseInt(cacheCharacter.attack),
 			defense: parseInt(cacheCharacter.defense),
 			hp: parseInt(cacheCharacter.hp),
