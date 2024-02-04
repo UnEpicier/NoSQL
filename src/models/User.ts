@@ -7,28 +7,28 @@ const UserSchema = new Schema(
 			type: String,
 			required: true,
 		},
-        email: {
+		email: {
 			type: String,
 			required: true,
 		},
-        password: {
+		password: {
 			type: String,
 			required: true,
 		},
-        currency: {
+		currency: {
 			type: Number,
 			required: true,
 		},
-        rank: {
+		rank: {
 			type: Number,
 			required: true,
 		},
-        roster: {
+		roster: {
 			type: [
 				{
 					type: Schema.ObjectId,
 					ref: 'Character',
-					unique: true,
+					unique: false,
 				},
 			],
 			required: true,
