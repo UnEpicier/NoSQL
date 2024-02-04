@@ -6,7 +6,7 @@ const SummonPoolSchema = new Schema(
 			{
 				type: Schema.Types.ObjectId,
 				ref: 'Character',
-				unique: true,
+				unique: false,
 			},
 		],
 		cost: {

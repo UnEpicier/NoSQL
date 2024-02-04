@@ -1,0 +1,106 @@
+{
+	"users": [
+		{
+			"username": "Alexis",
+			"email": "alexis.vasseur@ynov.com",
+			"password": "admin"
+		},
+		{
+			"username": "Charles",
+			"email": "charles.brun@ynov.com",
+			"password": "root"
+		},
+		{
+			"username": "Matthias",
+			"email": "matthias.batguzere@ynov.com",
+			"password": "12345"
+		},
+		{
+			"username": "Mehdi",
+			"email": "mehdi.senhaj@ynov.com",
+			"password": "password"
+		}
+	],
+	"characters": [
+		{
+			"attack": 50,
+			"defense": 30,
+			"hp": 30,
+			"sprite": "char1.png"
+		},
+		{
+			"attack": 20,
+			"defense": 60,
+			"hp": 75,
+			"sprite": "char2.png"
+		},
+		{
+			"attack": 10,
+			"defense": 10,
+			"hp": 20,
+			"sprite": "char3.png"
+		},
+		{
+			"attack": 100,
+			"defense": 10,
+			"hp": 100,
+			"sprite": "char4.png"
+		},
+		{
+			"attack": 55,
+			"defense": 200,
+			"hp": 68,
+			"sprite": "char5.png"
+		},
+		{
+			"attack": 156,
+			"defense": 29,
+			"hp": 550,
+			"sprite": "char6.png"
+		}
+	],
+	"shopitems": [
+		{
+			"cost": 200,
+			"sprite": "char1.png"
+		},
+		{
+			"cost": 600,
+			"sprite": "char2.png"
+		},
+		{
+			"cost": 900,
+			"sprite": "char3.png"
+		},
+		{
+			"cost": 1100,
+			"sprite": "char4.png"
+		},
+		{
+			"cost": 5100,
+			"sprite": "char5.png"
+		},
+		{
+			"cost": 12000,
+			"sprite": "char6.png"
+		}
+	],
+	"summonpools": [
+		{
+			"cost": 900,
+			"duration": 1200
+		},
+		{
+			"cost": 1500,
+			"duration": 10000
+		},
+		{
+			"cost": 5350,
+			"duration": 12000
+		},
+		{
+			"cost": 9420,
+			"duration": 23000
+		}
+	]
+}
