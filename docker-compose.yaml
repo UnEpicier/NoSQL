@@ -36,6 +36,8 @@ services:
             - ME_CONFIG_MONGODB_PORT=27017
             - ME_CONFIG_MONGODB_AUTH_USERNAME=user
             - ME_CONFIG_MONGODB_AUTH_PASSWORD=secret
+            - ME_CONFIG_BASICAUTH_USERNAME=user
+            - ME_CONFIG_BASICAUTH_PASSWORD=secret
         depends_on:
             - mongo
 volumes:

@@ -52,7 +52,7 @@ const getUserCurrency = async (req: Request, res: Response) => {
 	try {
 		const userCurrency = await getUserCurrencyInDB(id);
 
-		if (!userCurrency) {
+		if (userCurrency === null) {
 			res.status(404).end();
 			return;
 		}
@@ -71,7 +71,7 @@ const getUserRank = async (req: Request, res: Response) => {
 	try {
 		const userRank = await getUserRankInDB(id);
 
-		if (!userRank) {
+		if (userRank === null) {
 			res.status(404).end();
 			return;
 		}
