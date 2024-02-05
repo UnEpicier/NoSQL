@@ -23,36 +23,42 @@
 	],
 	"characters": [
 		{
+			"name": "Char1",
 			"attack": 50,
 			"defense": 30,
 			"hp": 30,
 			"sprite": "char1.png"
 		},
 		{
+			"name": "Char2",
 			"attack": 20,
 			"defense": 60,
 			"hp": 75,
 			"sprite": "char2.png"
 		},
 		{
+			"name": "Char3",
 			"attack": 10,
 			"defense": 10,
 			"hp": 20,
 			"sprite": "char3.png"
 		},
 		{
+			"name": "Char4",
 			"attack": 100,
 			"defense": 10,
 			"hp": 100,
 			"sprite": "char4.png"
 		},
 		{
+			"name": "Char5",
 			"attack": 55,
 			"defense": 200,
 			"hp": 68,
 			"sprite": "char5.png"
 		},
 		{
+			"name": "Char6",
 			"attack": 156,
 			"defense": 29,
 			"hp": 550,
@@ -62,27 +68,27 @@
 	"shopitems": [
 		{
 			"cost": 200,
-			"sprite": "char1.png"
+			"sprite": "item1.png"
 		},
 		{
 			"cost": 600,
-			"sprite": "char2.png"
+			"sprite": "item2.png"
 		},
 		{
 			"cost": 900,
-			"sprite": "char3.png"
+			"sprite": "item3.png"
 		},
 		{
 			"cost": 1100,
-			"sprite": "char4.png"
+			"sprite": "item4.png"
 		},
 		{
 			"cost": 5100,
-			"sprite": "char5.png"
+			"sprite": "item5.png"
 		},
 		{
 			"cost": 12000,
-			"sprite": "char6.png"
+			"sprite": "item6.png"
 		}
 	],
 	"summonpools": [

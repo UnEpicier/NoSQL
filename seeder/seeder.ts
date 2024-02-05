@@ -57,7 +57,7 @@ const feedTheDB = async () => {
 
 		await makeRequest({
 			baseURL: baseUrl,
-			url: '/user',
+			url: '/users',
 			method: 'POST',
 			data: {
 				username: user.username,
@@ -74,9 +74,10 @@ const feedTheDB = async () => {
 
 		const response = await makeRequest({
 			baseURL: baseUrl,
-			url: '/character',
+			url: '/characters',
 			method: 'POST',
 			data: {
+				name: character.name,
 				attack: character.attack,
 				defense: character.defense,
 				hp: character.hp,
@@ -92,7 +93,7 @@ const feedTheDB = async () => {
 		const shopitem = shopitems[i];
 		await makeRequest({
 			baseURL: baseUrl,
-			url: '/shopitem',
+			url: '/shopitems',
 			method: 'POST',
 			data: {
 				cost: shopitem.cost,
@@ -113,7 +114,7 @@ const feedTheDB = async () => {
 
 		await makeRequest({
 			baseURL: baseUrl,
-			url: '/summonpool',
+			url: '/summonpools',
 			method: 'POST',
 			data: {
 				characters: chars,
