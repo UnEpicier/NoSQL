@@ -63,10 +63,37 @@ const getCharacterInDB = async (id: string): Promise<Character | null> => {
 		await redisClient.connect();
 		if ((await redisClient.EXISTS(`character:${id}`)) == 0) {
 			// Try to get it from db
-			redisClient.quit();
 			const db = await connectToDB();
 			const character: Character | null | undefined =
-				await CharacterModel.findById(id);
+			await CharacterModel.findById(id);
+			if (character) {
+				await redisClient.HSET(
+					`character:${character._id}`,
+					'name',
+					character.name,
+				);
+				await redisClient.HSET(
+					`character:${character._id}`,
+					'attack',
+					character.attack,
+				);
+				await redisClient.HSET(
+					`character:${character._id}`,
+					'defense',
+					character.defense,
+				);
+				await redisClient.HSET(
+					`character:${character._id}`,
+					'hp',
+					character.hp,
+				);
+				await redisClient.HSET(
+					`character:${character._id}`,
+					'sprite',
+					character.sprite,
+				);
+			}
+			redisClient.quit();
 			await db.disconnect();
 			return character ? character : null;
 		}
@@ -136,7 +163,7 @@ const updateCharacterInDB = async (
 const deleteCharacterInDB = async (id: string): Promise<void> => {
 	try {
 		await redisClient.connect();
-		await redisClient.DEL(id);
+		await redisClient.DEL(`character:${id}`);
 		await redisClient.quit();
 
 		const db = await connectToDB();

@@ -128,8 +128,6 @@ const getUserRankInDB = async (id: string): Promise<number | null> => {
 	}
 };
 
-
-
 const getUserRosterInDB = async (id: string): Promise<Character[] | null | undefined> => {
 	try {
 		const key = id.includes('user:') ? id : `user:${id}`;

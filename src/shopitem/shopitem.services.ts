@@ -37,9 +37,21 @@ const getShopItemInDB = async (id: string): Promise<ShopItem | null> => {
 		await redisClient.connect();
 		if ((await redisClient.EXISTS(`shopitem:${id}`)) == 0) {
 			// Try to get it from db
-			redisClient.quit();
 			const db = await connectToDB();
 			const shopItem: ShopItem | null | undefined = await ShopItemModel.findById(id);
+			if (shopItem) {
+				await redisClient.HSET(
+					`shopItem:${shopItem._id}`,
+					'cost',
+					shopItem.cost,
+				);
+				await redisClient.HSET(
+					`shopItem:${shopItem._id}`,
+					'sprite',
+					shopItem.sprite,
+				);
+			}
+			redisClient.quit();
 			await db.disconnect();
 			return shopItem ? shopItem : null;
 		}
